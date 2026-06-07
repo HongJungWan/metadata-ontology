@@ -1,0 +1,180 @@
+package com.hris.metadata.domain.resolve;
+
+import com.hris.metadata.domain.expand.ExpansionResult;
+import com.hris.metadata.domain.expand.ExpansionService;
+import com.hris.metadata.domain.mapping.repository.SchemaMappingRepository;
+import com.hris.metadata.domain.mapping.repository.custom.dto.ColumnMappingRow;
+import com.hris.metadata.domain.normalize.NormalizationResult;
+import com.hris.metadata.domain.normalize.NormalizationService;
+import com.hris.metadata.domain.schema.entity.CodeValue;
+import com.hris.metadata.domain.schema.repository.CodeValueRepository;
+import com.hris.metadata.domain.resolve.dto.response.ResolveResponse;
+import com.hris.metadata.domain.resolve.dto.response.TimeRange;
+import com.hris.metadata.domain.term.entity.Term;
+import com.hris.metadata.domain.term.repository.TermRepository;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.UUID;
+
+/**
+ * /resolve 오케스트레이션 서비스.
+ * <p>
+ * normalize(기간 추출) → expand(동의어→표준용어) → map(용어→물리 컬럼/코드값) 을 차례로 수행해
+ * PRD §4.1 형식의 응답을 만든다. 매핑에 실패한 토큰은 unmapped 로 모은다.
+ */
+@Service
+@RequiredArgsConstructor
+@Transactional(readOnly = true)
+public class ResolveService {
+
+    private final NormalizationService normalizationService;
+    private final ExpansionService expansionService;
+    private final TermRepository termRepository;
+    private final SchemaMappingRepository schemaMappingRepository;
+    private final CodeValueRepository codeValueRepository;
+
+    /**
+     * 질의를 해석한다 (기준일 = 오늘).
+     */
+    public ResolveResponse resolve(String query) {
+        return resolve(query, LocalDate.now());
+    }
+
+    /**
+     * 질의를 해석한다 (기준일 명시 — 테스트용).
+     */
+    public ResolveResponse resolve(String query, LocalDate today) {
+        NormalizationResult normalized = normalizationService.normalize(query, today);
+        ExpansionResult expanded = expansionService.expand(normalized.getResidualQuery());
+
+        ResolvedTerms resolvedTerms = resolveTerms(expanded);
+        List<ResolveResponse.ColumnMapping> columnMappings =
+                buildColumnMappings(resolvedTerms.termIds(), expanded.getExpansions());
+
+        return ResolveResponse.builder()
+                .normalizedQuery(buildNormalizedQuery(expanded.getExpandedQuery(), normalized.getTimeRange()))
+                .terms(resolvedTerms.terms())
+                .columnMappings(columnMappings)
+                .timeRange(normalized.getTimeRange())
+                .unmapped(resolvedTerms.unmapped())
+                .build();
+    }
+
+    private ResolvedTerms resolveTerms(ExpansionResult expanded) {
+        Map<String, String> surfaceByCanonical = new LinkedHashMap<>();
+        for (ExpansionResult.TokenExpansion expansion : expanded.getExpansions()) {
+            surfaceByCanonical.put(expansion.getCanonical(), expansion.getSurface());
+        }
+
+        List<ResolveResponse.ResolvedTerm> terms = new ArrayList<>();
+        List<UUID> termIds = new ArrayList<>();
+        List<String> unmapped = new ArrayList<>();
+        Set<String> seen = new LinkedHashSet<>();
+
+        for (String token : expanded.getExpandedQuery().trim().split("\\s+")) {
+            classifyToken(token, surfaceByCanonical, seen, terms, termIds, unmapped);
+        }
+        return new ResolvedTerms(terms, termIds, unmapped);
+    }
+
+    private void classifyToken(String token, Map<String, String> surfaceByCanonical, Set<String> seen,
+                               List<ResolveResponse.ResolvedTerm> terms, List<UUID> termIds,
+                               List<String> unmapped) {
+        if (token.isBlank() || !seen.add(token)) {
+            return;
+        }
+        Optional<Term> term = termRepository.findByCanonicalName(token);
+        if (term.isEmpty()) {
+            unmapped.add(token);
+            return;
+        }
+        terms.add(new ResolveResponse.ResolvedTerm(token, surfaceByCanonical.get(token)));
+        termIds.add(term.get().getTermId());
+    }
+
+    private List<ResolveResponse.ColumnMapping> buildColumnMappings(
+            List<UUID> termIds, List<ExpansionResult.TokenExpansion> expansions) {
+        List<ColumnMappingRow> rows = schemaMappingRepository.findColumnMappingsByTermIds(termIds);
+        // 표면형이 코드값(예: "미정산"→PENDING)을 가리키면 컬럼.코드값으로 미리 풀어둔다 (PRD §4.1).
+        Map<String, String> codeByColumn = resolveCodeValues(expansions);
+
+        List<ResolveResponse.ColumnMapping> mappings = new ArrayList<>();
+        for (ColumnMappingRow row : rows) {
+            String code = row.getCodeValueRule();
+            if (code == null) {
+                code = codeByColumn.get(columnKey(row.getPhysicalTable(), row.getPhysicalColumn()));
+            }
+            mappings.add(new ResolveResponse.ColumnMapping(
+                    row.getPhysicalTable(), row.getPhysicalColumn(), code));
+        }
+        return mappings;
+    }
+
+    /**
+     * 질의 표면형 중 코드값 사전(코드/라벨/동의어)에 정확히 일치하는 것을 찾아
+     * "테이블.컬럼" → 코드 맵으로 돌려준다. 예: "미정산" → settlement.settlement_status → PENDING.
+     * <p>
+     * 해석된 용어와 무관한 순수 코드값 토큰(예: 용어 동의어가 아닌 "보류")은 여기서 다루지 않고
+     * /match-sql-pattern 이 담당한다.
+     */
+    private Map<String, String> resolveCodeValues(List<ExpansionResult.TokenExpansion> expansions) {
+        Map<String, String> codeByColumn = new LinkedHashMap<>();
+        for (ExpansionResult.TokenExpansion expansion : expansions) {
+            String surface = expansion.getSurface();
+            for (CodeValue candidate : codeValueRepository.findCandidatesBySurface(surface)) {
+                if (matchesSurface(candidate, surface)) {
+                    codeByColumn.put(columnKey(
+                            candidate.getSchemaCatalog().getPhysicalTable(),
+                            candidate.getSchemaCatalog().getPhysicalColumn()), candidate.getCode());
+                }
+            }
+        }
+        return codeByColumn;
+    }
+
+    /** LIKE 1차 필터 결과를 코드/라벨/동의어 정확 일치로 재검증한다 (부분일치 오탐 방지). */
+    private boolean matchesSurface(CodeValue codeValue, String surface) {
+        if (surface.equalsIgnoreCase(codeValue.getCode()) || surface.equals(codeValue.getLabel())) {
+            return true;
+        }
+        if (codeValue.getSynonyms() == null) {
+            return false;
+        }
+        for (String synonym : codeValue.getSynonyms().split(",")) {
+            if (synonym.trim().equals(surface)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private String columnKey(String table, String column) {
+        return table + "." + column;
+    }
+
+    private String buildNormalizedQuery(String expandedQuery, TimeRange timeRange) {
+        if (timeRange == null) {
+            return expandedQuery.trim();
+        }
+        String period = timeRange.getFrom() + "~" + timeRange.getTo();
+        if (expandedQuery.isBlank()) {
+            return period;
+        }
+        return expandedQuery.trim() + " " + period;
+    }
+
+    /** resolve 내부 집계 결과 */
+    private record ResolvedTerms(List<ResolveResponse.ResolvedTerm> terms, List<UUID> termIds,
+                                 List<String> unmapped) {
+    }
+}

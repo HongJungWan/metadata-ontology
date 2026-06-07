@@ -1,0 +1,139 @@
+# ===================================================================
+# metadata-ontology — 경량 온톨로지 메타데이터 계층 (정산 도메인)
+# 기본/LOCAL 프로필: H2 in-memory (외부 의존성 없음). AWS 미연결.
+# ===================================================================
+
+server:
+  port: 8096
+  shutdown: graceful
+  error:
+    include-message: always
+
+spring:
+  application:
+    name: metadata-ontology
+
+  # 기본 활성 프로필: local (H2 + 시드 데이터)
+  profiles:
+    active: local
+
+  # --- DATASOURCE: H2 in-memory (기본/LOCAL) ---
+  datasource:
+    driver-class-name: org.h2.Driver
+    url: jdbc:h2:mem:metadb;DB_CLOSE_DELAY=-1;MODE=PostgreSQL;DATABASE_TO_LOWER=TRUE
+    username: sa
+    password:
+
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+
+  # --- JPA/HIBERNATE ---
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: create-drop          # LOCAL: 부팅 시 스키마 생성, 종료 시 제거
+    properties:
+      hibernate:
+        format_sql: false
+        # meta 스키마(@Table schema="meta")를 H2 에서도 생성
+        hbm2ddl:
+          create_namespaces: true
+        jdbc:
+          batch_size: 25
+        default_batch_fetch_size: 16
+
+  # --- JACKSON/JSON ---
+  jackson:
+    serialization:
+      write-dates-as-timestamps: false
+      fail-on-empty-beans: false
+    default-property-inclusion: non_null
+    time-zone: UTC
+
+# --- 카탈로그 동기화 플래그 (기본 OFF — AWS 미연결) ---
+# true 로 켜도 CatalogSyncService.sync() 는 아직 미구현 (TODO(AWS)).
+catalog:
+  sync:
+    enabled: false
+
+# --- ACTUATOR ---
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health, info, metrics
+      base-path: /management
+  endpoint:
+    health:
+      show-details: always
+      probes:
+        enabled: true
+
+# --- SPRINGDOC / SWAGGER ---
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+    tags-sorter: alpha
+    operations-sorter: alpha
+  packages-to-scan: com.hris.metadata
+
+logging:
+  level:
+    root: INFO
+    com.hris.metadata: INFO
+    org.hibernate: WARN
+
+# ===================================================================
+# TODO(AWS): 실제 PostgreSQL `meta` 스키마 datasource (나중에 실제 값 기재)
+# AWS RDS 연결이 확정되면 아래 블록을 별도 프로필(prod 등)로 활성화한다.
+# 자격증명은 환경변수/EC2 환경 파일로 주입 — 저장소 평문 커밋 금지.
+# ---
+# ---
+# spring:
+#   config:
+#     activate:
+#       on-profile: prod
+#   datasource:
+#     driver-class-name: org.postgresql.Driver
+#     url: jdbc:postgresql://${DB_HOST}:${DB_PORT:5432}/${DB_NAME:medi}?currentSchema=meta
+#     username: ${DB_USER}
+#     password: ${DB_PASS}
+#     hikari:
+#       maximum-pool-size: 20
+#       auto-commit: false
+#   jpa:
+#     database-platform: org.hibernate.dialect.PostgreSQLDialect
+#     hibernate:
+#       ddl-auto: validate            # 운영: Flyway/수동 DDL 이 meta 스키마 관리, Hibernate 는 검증만
+#     properties:
+#       hibernate:
+#         default_schema: meta
+#         hbm2ddl:
+#           create_namespaces: true
+# ===================================================================
+
+# ===================================================================
+# TODO(AWS): Glue Data Catalog / Redshift information_schema 동기화 설정
+#            (나중에 실제 값 기재) — CatalogSyncService 가 사용.
+#            catalog.sync.enabled=true 로 켜고 아래 값을 채운다.
+# ---
+# catalog:
+#   sync:
+#     enabled: true
+#     source: glue                     # glue | redshift-information-schema
+#     cron: "0 0 * * * *"              # 매시 정각 동기화 (예시)
+# aws:
+#   region: ${AWS_REGION:ap-northeast-2}
+#   glue:
+#     database: ${GLUE_DATABASE}       # Glue Data Catalog 데이터베이스명
+# redshift:
+#   information-schema:
+#     # Redshift information_schema.columns 조회용 별도 datasource
+#     url: jdbc:redshift://${REDSHIFT_HOST}:5439/${REDSHIFT_DB}
+#     username: ${REDSHIFT_USER}
+#     password: ${REDSHIFT_PASS}
+# ===================================================================
