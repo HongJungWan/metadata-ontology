@@ -1,9 +1,10 @@
 package com.hris.metadata.application.resolve;
 
-import com.hris.metadata.application.expand.ExpansionResult;
-import com.hris.metadata.application.expand.ExpansionService;
-import com.hris.metadata.application.normalize.NormalizationResult;
-import com.hris.metadata.application.normalize.NormalizationService;
+import com.hris.metadata.domain.expand.ExpansionResult;
+import com.hris.metadata.domain.expand.ExpansionService;
+import com.hris.metadata.domain.normalize.NormalizationResult;
+import com.hris.metadata.domain.normalize.NormalizationService;
+import com.hris.metadata.domain.normalize.TimeRange;
 import com.hris.metadata.domain.mapping.ColumnMapping;
 import com.hris.metadata.domain.mapping.SchemaMappingRepository;
 import com.hris.metadata.domain.schema.CodeValueCandidate;
@@ -11,7 +12,6 @@ import com.hris.metadata.domain.schema.CodeValueRepository;
 import com.hris.metadata.domain.term.Term;
 import com.hris.metadata.domain.term.TermRepository;
 import com.hris.metadata.application.resolve.dto.response.ResolveResponse;
-import com.hris.metadata.application.resolve.dto.response.TimeRange;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

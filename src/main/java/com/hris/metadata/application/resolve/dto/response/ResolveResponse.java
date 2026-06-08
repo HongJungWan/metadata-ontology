@@ -1,5 +1,6 @@
 package com.hris.metadata.application.resolve.dto.response;
 
+import com.hris.metadata.domain.normalize.TimeRange;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AccessLevel;
 import lombok.Builder;

@@ -1,7 +1,7 @@
 package com.hris.metadata.application.promptcontext;
 
-import com.hris.metadata.application.expand.ExpansionResult;
-import com.hris.metadata.application.expand.ExpansionService;
+import com.hris.metadata.domain.expand.ExpansionResult;
+import com.hris.metadata.domain.expand.ExpansionService;
 import com.hris.metadata.domain.mapping.ColumnMapping;
 import com.hris.metadata.domain.mapping.SchemaMappingRepository;
 import com.hris.metadata.domain.schema.CodeValue;

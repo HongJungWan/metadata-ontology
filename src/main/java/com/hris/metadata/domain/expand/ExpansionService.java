@@ -1,24 +1,22 @@
-package com.hris.metadata.application.expand;
+package com.hris.metadata.domain.expand;
 
 import com.hris.metadata.domain.term.SynonymMatch;
 import com.hris.metadata.domain.term.SynonymRepository;
+import com.hris.metadata.shared.ddd.DomainService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
 /**
- * 동의어 확장 서비스 (응용 서비스).
+ * 동의어 확장 도메인 서비스.
  * <p>
  * 질의의 각 토큰을 동의어 사전에서 찾아 표준 용어로 치환한다 (예: "세틀"→"정산", "머천트"→"가맹점").
  * 사전에 없는 토큰은 그대로 둔다.
  */
-@Service
+@DomainService
 @RequiredArgsConstructor
-@Transactional(readOnly = true)
 public class ExpansionService {
 
     private final SynonymRepository synonymRepository;

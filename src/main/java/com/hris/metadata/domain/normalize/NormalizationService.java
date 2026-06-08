@@ -1,7 +1,6 @@
-package com.hris.metadata.application.normalize;
+package com.hris.metadata.domain.normalize;
 
-import com.hris.metadata.application.resolve.dto.response.TimeRange;
-import org.springframework.stereotype.Service;
+import com.hris.metadata.shared.ddd.DomainService;
 
 import java.time.DayOfWeek;
 import java.time.LocalDate;
@@ -10,27 +9,19 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * 한국어 상대 기간 정규화 서비스 (응용 서비스).
+ * 한국어 상대 기간 정규화 도메인 서비스.
  * <p>
  * "지난달/이번달/지난주/이번주/오늘/어제/최근 N일" 등의 표현을 실제 {from, to} 날짜로 변환한다.
- * 모든 메서드는 기준일(today) 을 인자로 받아 테스트 가능하도록 설계했다.
- * 작성자(author) 정규화는 placeholder 수준의 단순 구현이다.
+ * 모든 메서드는 기준일(today) 을 인자로 받아 무상태·테스트 가능하도록 설계했다.
  */
-@Service
+@DomainService
 public class NormalizationService {
 
     /** "최근 N일" 패턴 (예: "최근 7일") */
     private static final Pattern RECENT_DAYS = Pattern.compile("최근\\s*(\\d+)\\s*일");
 
     /**
-     * 질의를 정규화한다 (기준일 = 오늘).
-     */
-    public NormalizationResult normalize(String query) {
-        return normalize(query, LocalDate.now());
-    }
-
-    /**
-     * 질의를 정규화한다 (기준일 명시 — 테스트용).
+     * 질의를 정규화한다 (기준일 명시).
      *
      * @param query 원본 질의
      * @param today 기준일

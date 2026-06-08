@@ -1,4 +1,4 @@
-package com.hris.metadata.application.expand;
+package com.hris.metadata.domain.expand;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AccessLevel;

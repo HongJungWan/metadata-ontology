@@ -1,6 +1,5 @@
-package com.hris.metadata.application.pattern;
+package com.hris.metadata.domain.pattern;
 
-import com.hris.metadata.domain.pattern.PatternOperator;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AccessLevel;
 import lombok.Getter;
