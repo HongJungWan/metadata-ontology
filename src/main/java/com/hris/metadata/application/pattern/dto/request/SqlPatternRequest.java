@@ -1,4 +1,4 @@
-package com.hris.metadata.presentation.pattern.dto.request;
+package com.hris.metadata.application.pattern.dto.request;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.hris.metadata.domain.pattern.PatternOperator;

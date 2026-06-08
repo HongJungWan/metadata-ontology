@@ -1,4 +1,4 @@
-package com.hris.metadata.presentation.resolve.dto.response;
+package com.hris.metadata.application.resolve.dto.response;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AccessLevel;

@@ -1,8 +1,8 @@
 package com.hris.metadata.presentation.pattern;
 
 import com.hris.metadata.application.pattern.SqlPatternAdminService;
-import com.hris.metadata.presentation.pattern.dto.request.SqlPatternRequest;
-import com.hris.metadata.presentation.pattern.dto.response.SqlPatternResponse;
+import com.hris.metadata.application.pattern.dto.request.SqlPatternRequest;
+import com.hris.metadata.application.pattern.dto.response.SqlPatternResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;

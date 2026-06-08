@@ -1,4 +1,4 @@
-package com.hris.metadata.presentation.resolve.dto.request;
+package com.hris.metadata.application.resolve.dto.request;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
