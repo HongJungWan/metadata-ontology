@@ -2,6 +2,8 @@ package com.hris.metadata.domain.schema;
 
 import com.hris.metadata.global.common.BaseEntity;
 import com.hris.metadata.shared.ddd.AggregateRoot;
+import com.hris.metadata.shared.ddd.Subdomain;
+import com.hris.metadata.shared.ddd.SubdomainType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
@@ -23,6 +25,7 @@ import java.util.UUID;
  * 물리 테이블·컬럼 정보를 담는다. 운영 환경에서는 Redshift/Glue 와 주기 동기화 대상이다.
  */
 @AggregateRoot
+@Subdomain(SubdomainType.SUPPORTING)
 @Entity
 @Table(name = "schema_catalog", schema = "meta",
         indexes = @Index(name = "idx_schema_catalog_table_column", columnList = "physical_table, physical_column"))

@@ -2,6 +2,8 @@ package com.hris.metadata.domain.term;
 
 import com.hris.metadata.global.common.BaseEntity;
 import com.hris.metadata.shared.ddd.AggregateRoot;
+import com.hris.metadata.shared.ddd.Subdomain;
+import com.hris.metadata.shared.ddd.SubdomainType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -26,6 +28,7 @@ import java.util.UUID;
  * 표준 용어는 식별자(termId)로만 참조한다 (애그리거트 간 ID 참조).
  */
 @AggregateRoot
+@Subdomain(SubdomainType.CORE)
 @Entity
 @Table(name = "synonym", schema = "meta",
         indexes = @Index(name = "idx_synonym_surface", columnList = "surface"))

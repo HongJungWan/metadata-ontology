@@ -10,9 +10,9 @@ import com.hris.metadata.domain.term.TermRepository;
 import com.hris.metadata.domain.term.TermStatus;
 import com.hris.metadata.global.exception.BusinessException;
 import com.hris.metadata.global.exception.ErrorCode;
-import com.hris.metadata.application.term.dto.request.SchemaMappingRequest;
-import com.hris.metadata.application.term.dto.request.SynonymRequest;
-import com.hris.metadata.application.term.dto.request.TermRequest;
+import com.hris.metadata.application.term.command.AddSynonymCommand;
+import com.hris.metadata.application.term.command.CreateTermCommand;
+import com.hris.metadata.application.term.command.MapTermToColumnCommand;
 import com.hris.metadata.application.term.dto.response.SchemaMappingResponse;
 import com.hris.metadata.application.term.dto.response.SynonymResponse;
 import com.hris.metadata.application.term.dto.response.TermResponse;
@@ -41,13 +41,13 @@ public class TermAdminService {
     // ===== Term =====
 
     @Transactional
-    public TermResponse createTerm(TermRequest request) {
-        if (termRepository.existsByCanonicalName(request.getCanonicalName())) {
+    public TermResponse createTerm(CreateTermCommand command) {
+        if (termRepository.existsByCanonicalName(command.canonicalName())) {
             throw new BusinessException(ErrorCode.DUPLICATE_TERM);
         }
-        Term term = Term.create(UUID.randomUUID(), request.getCanonicalName(),
-                request.getDomain(), request.getDefinition());
-        term.changeStatus(request.getStatus() == null ? TermStatus.DRAFT : request.getStatus());
+        Term term = Term.create(UUID.randomUUID(), command.canonicalName(),
+                command.domain(), command.definition());
+        term.changeStatus(command.status() == null ? TermStatus.DRAFT : command.status());
         termRepository.save(term);
         return TermResponse.from(term);
     }
@@ -61,10 +61,10 @@ public class TermAdminService {
     }
 
     @Transactional
-    public TermResponse updateTerm(UUID termId, TermRequest request) {
+    public TermResponse updateTerm(UUID termId, CreateTermCommand command) {
         Term term = getTermOrThrow(termId);
-        TermStatus status = request.getStatus() == null ? term.getStatus() : request.getStatus();
-        term.update(request.getCanonicalName(), request.getDomain(), request.getDefinition(), status);
+        TermStatus status = command.status() == null ? term.getStatus() : command.status();
+        term.update(command.canonicalName(), command.domain(), command.definition(), status);
         return TermResponse.from(term);
     }
 
@@ -83,10 +83,10 @@ public class TermAdminService {
     // ===== Synonym =====
 
     @Transactional
-    public SynonymResponse createSynonym(SynonymRequest request) {
-        getTermOrThrow(request.getTermId());
-        Synonym synonym = Synonym.create(UUID.randomUUID(), request.getTermId(),
-                request.getSurface(), request.getType());
+    public SynonymResponse createSynonym(AddSynonymCommand command) {
+        getTermOrThrow(command.termId());
+        Synonym synonym = Synonym.create(UUID.randomUUID(), command.termId(),
+                command.surface(), command.type());
         synonymRepository.save(synonym);
         return SynonymResponse.from(synonym);
     }
@@ -105,20 +105,20 @@ public class TermAdminService {
     // ===== Mapping =====
 
     @Transactional
-    public SchemaMappingResponse createMapping(SchemaMappingRequest request) {
-        getTermOrThrow(request.getTermId());
-        schemaCatalogRepository.findById(request.getSchemaCatalogId())
+    public SchemaMappingResponse createMapping(MapTermToColumnCommand command) {
+        getTermOrThrow(command.termId());
+        schemaCatalogRepository.findById(command.schemaCatalogId())
                 .orElseThrow(() -> new BusinessException(ErrorCode.SCHEMA_CATALOG_NOT_FOUND));
         if (schemaMappingRepository.existsByTermIdAndSchemaCatalogId(
-                request.getTermId(), request.getSchemaCatalogId())) {
+                command.termId(), command.schemaCatalogId())) {
             throw new BusinessException(ErrorCode.DUPLICATE_MAPPING);
         }
         SchemaMapping mapping = SchemaMapping.builder()
                 .schemaMappingId(UUID.randomUUID())
-                .termId(request.getTermId())
-                .schemaCatalogId(request.getSchemaCatalogId())
-                .mappingType(request.getMappingType())
-                .codeValueRule(request.getCodeValueRule())
+                .termId(command.termId())
+                .schemaCatalogId(command.schemaCatalogId())
+                .mappingType(command.mappingType())
+                .codeValueRule(command.codeValueRule())
                 .build();
         schemaMappingRepository.save(mapping);
         return SchemaMappingResponse.from(mapping);

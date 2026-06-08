@@ -4,7 +4,7 @@ import com.hris.metadata.domain.pattern.SqlPattern;
 import com.hris.metadata.domain.pattern.SqlPatternRepository;
 import com.hris.metadata.global.exception.BusinessException;
 import com.hris.metadata.global.exception.ErrorCode;
-import com.hris.metadata.application.pattern.dto.request.SqlPatternRequest;
+import com.hris.metadata.application.pattern.command.DefineSqlPatternCommand;
 import com.hris.metadata.application.pattern.dto.response.SqlPatternResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -24,10 +24,10 @@ public class SqlPatternAdminService {
     private final SqlPatternRepository sqlPatternRepository;
 
     @Transactional
-    public SqlPatternResponse create(SqlPatternRequest request) {
-        SqlPattern pattern = SqlPattern.create(UUID.randomUUID(), request.getTriggerKeywords(),
-                request.getColumnTarget(), request.getOperator(),
-                request.getValueTemplate(), request.getPriority());
+    public SqlPatternResponse create(DefineSqlPatternCommand command) {
+        SqlPattern pattern = SqlPattern.create(UUID.randomUUID(), command.triggerKeywords(),
+                command.columnTarget(), command.operator(),
+                command.valueTemplate(), command.priority());
         sqlPatternRepository.save(pattern);
         return SqlPatternResponse.from(pattern);
     }
@@ -37,10 +37,10 @@ public class SqlPatternAdminService {
     }
 
     @Transactional
-    public SqlPatternResponse update(UUID sqlPatternId, SqlPatternRequest request) {
+    public SqlPatternResponse update(UUID sqlPatternId, DefineSqlPatternCommand command) {
         SqlPattern pattern = getOrThrow(sqlPatternId);
-        pattern.update(request.getTriggerKeywords(), request.getColumnTarget(), request.getOperator(),
-                request.getValueTemplate(), request.getPriority());
+        pattern.update(command.triggerKeywords(), command.columnTarget(), command.operator(),
+                command.valueTemplate(), command.priority());
         return SqlPatternResponse.from(pattern);
     }
 

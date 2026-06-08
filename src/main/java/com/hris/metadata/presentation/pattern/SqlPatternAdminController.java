@@ -1,7 +1,7 @@
 package com.hris.metadata.presentation.pattern;
 
 import com.hris.metadata.application.pattern.SqlPatternAdminService;
-import com.hris.metadata.application.pattern.dto.request.SqlPatternRequest;
+import com.hris.metadata.application.pattern.command.DefineSqlPatternCommand;
 import com.hris.metadata.application.pattern.dto.response.SqlPatternResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -34,8 +34,8 @@ public class SqlPatternAdminController {
 
     @Operation(summary = "SQL 패턴 생성")
     @PostMapping
-    public ResponseEntity<SqlPatternResponse> create(@Valid @RequestBody SqlPatternRequest request) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(sqlPatternAdminService.create(request));
+    public ResponseEntity<SqlPatternResponse> create(@Valid @RequestBody DefineSqlPatternCommand command) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(sqlPatternAdminService.create(command));
     }
 
     @Operation(summary = "SQL 패턴 목록 조회")
@@ -47,8 +47,8 @@ public class SqlPatternAdminController {
     @Operation(summary = "SQL 패턴 수정")
     @PutMapping("/{sqlPatternId}")
     public ResponseEntity<SqlPatternResponse> update(@PathVariable UUID sqlPatternId,
-                                                     @Valid @RequestBody SqlPatternRequest request) {
-        return ResponseEntity.ok(sqlPatternAdminService.update(sqlPatternId, request));
+                                                     @Valid @RequestBody DefineSqlPatternCommand command) {
+        return ResponseEntity.ok(sqlPatternAdminService.update(sqlPatternId, command));
     }
 
     @Operation(summary = "SQL 패턴 삭제 (소프트 삭제)")

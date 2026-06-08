@@ -2,6 +2,8 @@ package com.hris.metadata.domain.schema;
 
 import com.hris.metadata.global.common.BaseEntity;
 import com.hris.metadata.shared.ddd.AggregateRoot;
+import com.hris.metadata.shared.ddd.Subdomain;
+import com.hris.metadata.shared.ddd.SubdomainType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
@@ -24,6 +26,7 @@ import java.util.UUID;
  * 스키마 카탈로그는 식별자(schemaCatalogId)로만 참조한다 (애그리거트 간 ID 참조).
  */
 @AggregateRoot
+@Subdomain(SubdomainType.SUPPORTING)
 @Entity
 @Table(name = "code_value", schema = "meta",
         indexes = @Index(name = "idx_code_value_catalog_id", columnList = "schema_catalog_id"))

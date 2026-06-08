@@ -1,8 +1,8 @@
 package com.hris.metadata.presentation.schema;
 
 import com.hris.metadata.application.schema.SchemaCatalogService;
-import com.hris.metadata.application.schema.dto.request.CodeValueRequest;
-import com.hris.metadata.application.schema.dto.request.SchemaCatalogRequest;
+import com.hris.metadata.application.schema.command.AddCodeValueCommand;
+import com.hris.metadata.application.schema.command.RegisterSchemaCatalogCommand;
 import com.hris.metadata.application.schema.dto.response.CodeValueResponse;
 import com.hris.metadata.application.schema.dto.response.SchemaCatalogResponse;
 import io.swagger.v3.oas.annotations.Operation;
@@ -37,8 +37,8 @@ public class SchemaCatalogController {
     @Operation(summary = "스키마 카탈로그 생성")
     @PostMapping("/catalogs")
     public ResponseEntity<SchemaCatalogResponse> createCatalog(
-            @Valid @RequestBody SchemaCatalogRequest request) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(schemaCatalogService.createCatalog(request));
+            @Valid @RequestBody RegisterSchemaCatalogCommand command) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(schemaCatalogService.createCatalog(command));
     }
 
     @Operation(summary = "스키마 카탈로그 목록 조회")
@@ -50,8 +50,8 @@ public class SchemaCatalogController {
     @Operation(summary = "스키마 카탈로그 수정")
     @PutMapping("/catalogs/{schemaCatalogId}")
     public ResponseEntity<SchemaCatalogResponse> updateCatalog(
-            @PathVariable UUID schemaCatalogId, @Valid @RequestBody SchemaCatalogRequest request) {
-        return ResponseEntity.ok(schemaCatalogService.updateCatalog(schemaCatalogId, request));
+            @PathVariable UUID schemaCatalogId, @Valid @RequestBody RegisterSchemaCatalogCommand command) {
+        return ResponseEntity.ok(schemaCatalogService.updateCatalog(schemaCatalogId, command));
     }
 
     @Operation(summary = "스키마 카탈로그 삭제 (소프트 삭제)")
@@ -63,8 +63,8 @@ public class SchemaCatalogController {
 
     @Operation(summary = "코드값 생성")
     @PostMapping("/code-values")
-    public ResponseEntity<CodeValueResponse> createCodeValue(@Valid @RequestBody CodeValueRequest request) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(schemaCatalogService.createCodeValue(request));
+    public ResponseEntity<CodeValueResponse> createCodeValue(@Valid @RequestBody AddCodeValueCommand command) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(schemaCatalogService.createCodeValue(command));
     }
 
     @Operation(summary = "카탈로그별 코드값 목록 조회")

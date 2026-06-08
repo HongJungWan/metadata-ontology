@@ -2,6 +2,8 @@ package com.hris.metadata.domain.pattern;
 
 import com.hris.metadata.global.common.BaseEntity;
 import com.hris.metadata.shared.ddd.AggregateRoot;
+import com.hris.metadata.shared.ddd.Subdomain;
+import com.hris.metadata.shared.ddd.SubdomainType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -25,6 +27,7 @@ import java.util.UUID;
  * 실제 SQL 조립·실행은 소비자(P1) 몫이며, 본 서비스는 후보 매핑까지만 제공한다.
  */
 @AggregateRoot
+@Subdomain(SubdomainType.GENERIC)
 @Entity
 @Table(name = "sql_pattern", schema = "meta")
 @Where(clause = "deleted_at IS NULL")
