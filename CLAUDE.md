@@ -50,14 +50,15 @@
 | 레이어 | 글롭 | 내용 |
 |---|---|---|
 | `shared.ddd` | — | 마커 어노테이션 5종 (`@AggregateRoot` 등) |
-| `domain` | `**/domain/**` | 엔티티·VO·도메인 record·**포트(plain interface)**. 바깥 레이어 의존 금지. |
-| `application` | `**/application/**` | `@Service` 오케스트레이션. 도메인 포트에만 의존(+ 서로). 결과 홀더(NormalizationResult/ExpansionResult/SqlPatternMatch/ImportResult) 포함. |
-| `infrastructure` | `**/infrastructure/**` | 포트 어댑터 `*RepositoryImpl`(+ Spring Data `*JpaRepository`/QueryDSL), config, DataSeeder, catalogsync. |
-| `presentation` | `**/controller/**`,`**/presentation/**` | 컨트롤러 + 모든 DTO(request/response, TimeRange/ResolveResponse 포함). |
+| `domain` | `**/domain/**` | 엔티티·VO·도메인 record·**포트(plain interface)**. 순수 도메인 로직 서비스(`@DomainService`: Normalization/Expansion/SqlPattern 매칭)와 그 결과 홀더(NormalizationResult/ExpansionResult/SqlPatternMatch)·TimeRange 포함. 바깥 레이어 의존 금지. |
+| `application` | `**/application/**` | `@Service` 오케스트레이션(ResolveService/PromptContextService 등). 도메인 포트·도메인 서비스에만 의존(+ 서로). ImportResult 등 응용 결과 홀더 포함. |
+| `infrastructure` | `**/infrastructure/**` | 포트 어댑터 `*RepositoryImpl`(+ Spring Data `*JpaRepository`/QueryDSL), config(도메인 서비스 빈 등록 `DomainServiceConfig` 포함), DataSeeder, catalogsync. |
+| `presentation` | `**/controller/**`,`**/presentation/**` | 컨트롤러. DTO(request/response, ResolveResponse 등)는 `application.**.dto` 에 위치. |
 
 - **애그리거트 루트(`@AggregateRoot`)**: `Term`·`SchemaCatalog`·`SchemaMapping`·`SqlPattern`만. `Synonym`/`CodeValue`는 plain `@Entity`(여러 레이어에서 읽힘).
 - **루트 간 참조는 ID로**: 엔티티는 다른 루트를 객체 필드로 참조하지 않는다(`@ManyToOne` 제거, `termId`/`schemaCatalogId`만). 조인 결과는 도메인 record(`ColumnMapping`/`CodeValueCandidate`/`SynonymMatch`)로 평면화해 포트가 반환.
 - **DIP**: 도메인엔 포트 인터페이스만, 구현(`*RepositoryImpl`)은 infrastructure. `*RepositoryImpl`/`*RepositoryCustomImpl` 파일명은 domain 에서 금지.
+- **도메인 서비스(`@DomainService`)**: 순수 도메인 로직(Normalization/Expansion/SqlPattern 매칭)은 domain 에 plain 클래스로 둔다. Spring 스테레오타입 금지(가드 차단) → `infrastructure.config.DomainServiceConfig` 의 `@Bean` 으로 등록. 무상태(주입 포트는 `final`)만 허용. `LocalDate.now()` 등 시계는 도메인에서 호출 금지 → 호출자(application/presentation)가 기준일을 주입.
 - **차단(block) 규칙**: domain 에 `@Service`/`@Transactional`/`@Setter`/`@Data`/public setter/`.now()`/`UUID.randomUUID()` 금지 · 빈약 엔티티 금지 · domain→application/infra 임포트 금지 · application→infra 임포트 금지 · 필드주입(`@Autowired`/`@Value` 필드) 금지(생성자 주입) · `./gradlew`만 사용. (`UUID.randomUUID()`/`LocalDate.now()`는 application/infra 에선 허용.)
 - 현재 전 소스 **차단 0건**, `./gradlew clean build`·ArchUnit GREEN.
 - **커맨드**: `/ddd-review` · `/ddd-fix` · `/verify`. 훅 실행에 Node.js 필요.

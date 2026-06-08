@@ -1,11 +1,11 @@
 package com.hris.metadata.presentation.resolve;
 
-import com.hris.metadata.application.expand.ExpansionResult;
-import com.hris.metadata.application.expand.ExpansionService;
-import com.hris.metadata.application.normalize.NormalizationResult;
-import com.hris.metadata.application.normalize.NormalizationService;
-import com.hris.metadata.application.pattern.SqlPatternMatch;
-import com.hris.metadata.application.pattern.SqlPatternService;
+import com.hris.metadata.domain.expand.ExpansionResult;
+import com.hris.metadata.domain.expand.ExpansionService;
+import com.hris.metadata.domain.normalize.NormalizationResult;
+import com.hris.metadata.domain.normalize.NormalizationService;
+import com.hris.metadata.domain.pattern.SqlPatternMatch;
+import com.hris.metadata.domain.pattern.SqlPatternService;
 import com.hris.metadata.application.promptcontext.PromptContextService;
 import com.hris.metadata.application.resolve.ResolveService;
 import com.hris.metadata.application.resolve.dto.request.MatchSqlPatternRequest;
@@ -22,6 +22,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 
@@ -57,7 +58,7 @@ public class ResolveController {
     @Operation(summary = "기간 정규화", description = "\"지난달\" 등 상대 기간 표현을 실제 날짜 범위로 변환한다.")
     @PostMapping("/normalize")
     public ResponseEntity<NormalizationResult> normalize(@Valid @RequestBody ResolveRequest request) {
-        return ResponseEntity.ok(normalizationService.normalize(request.getQuery()));
+        return ResponseEntity.ok(normalizationService.normalize(request.getQuery(), LocalDate.now()));
     }
 
     @Operation(summary = "SQL 패턴 매칭", description = "키워드를 컬럼·연산자·값 후보로 매핑한다.")

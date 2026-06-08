@@ -1,6 +1,5 @@
-package com.hris.metadata.application.normalize;
+package com.hris.metadata.domain.normalize;
 
-import com.hris.metadata.application.resolve.dto.response.TimeRange;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 

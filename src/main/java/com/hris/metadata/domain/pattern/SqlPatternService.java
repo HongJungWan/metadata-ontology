@@ -1,10 +1,7 @@
-package com.hris.metadata.application.pattern;
+package com.hris.metadata.domain.pattern;
 
-import com.hris.metadata.domain.pattern.SqlPattern;
-import com.hris.metadata.domain.pattern.SqlPatternRepository;
+import com.hris.metadata.shared.ddd.DomainService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -13,14 +10,13 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * SQL 패턴 매칭 서비스 (응용 서비스).
+ * SQL 패턴 매칭 도메인 서비스.
  * <p>
  * 키워드 목록을 받아 트리거 키워드가 일치하는 패턴들을 컬럼·연산자·값 후보로 반환한다.
  * 매칭은 priority 오름차순으로 정렬한다.
  */
-@Service
+@DomainService
 @RequiredArgsConstructor
-@Transactional(readOnly = true)
 public class SqlPatternService {
 
     private final SqlPatternRepository sqlPatternRepository;

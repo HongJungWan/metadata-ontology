@@ -1,4 +1,4 @@
-package com.hris.metadata.application.expand;
+package com.hris.metadata.domain.expand;
 
 import com.hris.metadata.domain.term.SynonymMatch;
 import com.hris.metadata.domain.term.SynonymRepository;
