@@ -58,6 +58,31 @@ public class Term extends BaseEntity {
     @Column(name = "status", nullable = false, length = 20)
     private TermStatus status;
 
+    /**
+     * 표준 용어 생성 (불변식 강제).
+     * <p>
+     * canonicalName·domain 은 공백일 수 없으며, 상태는 ACTIVE 로 시작한다.
+     * id 는 application 레이어에서 생성해 주입한다(도메인은 ID 생성기를 호출하지 않는다).
+     */
+    public static Term create(UUID termId, String canonicalName, String domain, String definition) {
+        if (termId == null) {
+            throw new IllegalArgumentException("termId 는 필수입니다.");
+        }
+        if (canonicalName == null || canonicalName.isBlank()) {
+            throw new IllegalArgumentException("canonicalName 은 공백일 수 없습니다.");
+        }
+        if (domain == null || domain.isBlank()) {
+            throw new IllegalArgumentException("domain 은 공백일 수 없습니다.");
+        }
+        return Term.builder()
+                .termId(termId)
+                .canonicalName(canonicalName)
+                .domain(domain)
+                .definition(definition)
+                .status(TermStatus.ACTIVE)
+                .build();
+    }
+
     /** 용어 필드 수정 (JPA dirty checking) */
     public void update(String canonicalName, String domain, String definition, TermStatus status) {
         this.canonicalName = canonicalName;

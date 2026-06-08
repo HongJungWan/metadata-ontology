@@ -55,25 +55,25 @@ public class ResolveService {
      */
     public ResolveResponse resolve(String query, LocalDate today) {
         NormalizationResult normalized = normalizationService.normalize(query, today);
-        ExpansionResult expanded = expansionService.expand(normalized.getResidualQuery());
+        ExpansionResult expanded = expansionService.expand(normalized.residualQuery());
 
         ResolvedTerms resolvedTerms = resolveTerms(expanded);
         List<ResolveResponse.ColumnMapping> columnMappings =
-                buildColumnMappings(resolvedTerms.termIds(), expanded.getExpansions());
+                buildColumnMappings(resolvedTerms.termIds(), expanded.expansions());
 
         return ResolveResponse.builder()
-                .normalizedQuery(buildNormalizedQuery(expanded.getExpandedQuery(), normalized.getTimeRange()))
+                .normalizedQuery(buildNormalizedQuery(expanded.expandedQuery(), normalized.timeRange()))
                 .terms(resolvedTerms.terms())
                 .columnMappings(columnMappings)
-                .timeRange(normalized.getTimeRange())
+                .timeRange(normalized.timeRange())
                 .unmapped(resolvedTerms.unmapped())
                 .build();
     }
 
     private ResolvedTerms resolveTerms(ExpansionResult expanded) {
         Map<String, String> surfaceByCanonical = new LinkedHashMap<>();
-        for (ExpansionResult.TokenExpansion expansion : expanded.getExpansions()) {
-            surfaceByCanonical.put(expansion.getCanonical(), expansion.getSurface());
+        for (ExpansionResult.TokenExpansion expansion : expanded.expansions()) {
+            surfaceByCanonical.put(expansion.canonical(), expansion.surface());
         }
 
         List<ResolveResponse.ResolvedTerm> terms = new ArrayList<>();
@@ -81,7 +81,7 @@ public class ResolveService {
         List<String> unmapped = new ArrayList<>();
         Set<String> seen = new LinkedHashSet<>();
 
-        for (String token : expanded.getExpandedQuery().trim().split("\\s+")) {
+        for (String token : expanded.expandedQuery().trim().split("\\s+")) {
             classifyToken(token, surfaceByCanonical, seen, terms, termIds, unmapped);
         }
         return new ResolvedTerms(terms, termIds, unmapped);
@@ -130,7 +130,7 @@ public class ResolveService {
     private Map<String, String> resolveCodeValues(List<ExpansionResult.TokenExpansion> expansions) {
         Map<String, String> codeByColumn = new LinkedHashMap<>();
         for (ExpansionResult.TokenExpansion expansion : expansions) {
-            String surface = expansion.getSurface();
+            String surface = expansion.surface();
             for (CodeValueCandidate candidate : codeValueRepository.findCandidatesBySurface(surface)) {
                 if (matchesSurface(candidate, surface)) {
                     codeByColumn.put(columnKey(
@@ -166,7 +166,7 @@ public class ResolveService {
         if (timeRange == null) {
             return expandedQuery.trim();
         }
-        String period = timeRange.getFrom() + "~" + timeRange.getTo();
+        String period = timeRange.from() + "~" + timeRange.to();
         if (expandedQuery.isBlank()) {
             return period;
         }

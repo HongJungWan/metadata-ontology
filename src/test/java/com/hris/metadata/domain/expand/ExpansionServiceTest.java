@@ -38,13 +38,13 @@ class ExpansionServiceTest {
 
         ExpansionResult result = expansionService.expand("세틀 머천트 지난달");
 
-        assertThat(result.getExpandedQuery()).isEqualTo("정산상태 가맹점 지난달");
-        assertThat(result.getExpansions()).hasSize(2);
-        assertThat(result.getExpansions())
-                .extracting(ExpansionResult.TokenExpansion::getSurface)
+        assertThat(result.expandedQuery()).isEqualTo("정산상태 가맹점 지난달");
+        assertThat(result.expansions()).hasSize(2);
+        assertThat(result.expansions())
+                .extracting(ExpansionResult.TokenExpansion::surface)
                 .containsExactly("세틀", "머천트");
-        assertThat(result.getExpansions())
-                .extracting(ExpansionResult.TokenExpansion::getCanonical)
+        assertThat(result.expansions())
+                .extracting(ExpansionResult.TokenExpansion::canonical)
                 .containsExactly("정산상태", "가맹점");
     }
 
@@ -56,8 +56,8 @@ class ExpansionServiceTest {
 
         ExpansionResult result = expansionService.expand("정산금액");
 
-        assertThat(result.getExpandedQuery()).isEqualTo("정산금액");
-        assertThat(result.getExpansions()).isEmpty();
+        assertThat(result.expandedQuery()).isEqualTo("정산금액");
+        assertThat(result.expansions()).isEmpty();
     }
 
     @Test
@@ -65,7 +65,7 @@ class ExpansionServiceTest {
     void blankQuery() {
         ExpansionResult result = expansionService.expand("");
 
-        assertThat(result.getExpandedQuery()).isEmpty();
-        assertThat(result.getExpansions()).isEmpty();
+        assertThat(result.expandedQuery()).isEmpty();
+        assertThat(result.expansions()).isEmpty();
     }
 }

@@ -45,13 +45,9 @@ public class TermAdminService {
         if (termRepository.existsByCanonicalName(request.getCanonicalName())) {
             throw new BusinessException(ErrorCode.DUPLICATE_TERM);
         }
-        Term term = Term.builder()
-                .termId(UUID.randomUUID())
-                .canonicalName(request.getCanonicalName())
-                .domain(request.getDomain())
-                .definition(request.getDefinition())
-                .status(request.getStatus() == null ? TermStatus.DRAFT : request.getStatus())
-                .build();
+        Term term = Term.create(UUID.randomUUID(), request.getCanonicalName(),
+                request.getDomain(), request.getDefinition());
+        term.changeStatus(request.getStatus() == null ? TermStatus.DRAFT : request.getStatus());
         termRepository.save(term);
         return TermResponse.from(term);
     }
@@ -89,12 +85,8 @@ public class TermAdminService {
     @Transactional
     public SynonymResponse createSynonym(SynonymRequest request) {
         getTermOrThrow(request.getTermId());
-        Synonym synonym = Synonym.builder()
-                .synonymId(UUID.randomUUID())
-                .termId(request.getTermId())
-                .surface(request.getSurface())
-                .type(request.getType())
-                .build();
+        Synonym synonym = Synonym.create(UUID.randomUUID(), request.getTermId(),
+                request.getSurface(), request.getType());
         synonymRepository.save(synonym);
         return SynonymResponse.from(synonym);
     }

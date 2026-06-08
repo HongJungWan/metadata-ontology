@@ -44,8 +44,8 @@ class ResolveServiceIntegrationTest {
         ResolveResponse response = resolveService.resolve("미정산 가맹점 지난달", LocalDate.of(2026, 6, 7));
 
         assertThat(response.getTimeRange()).isNotNull();
-        assertThat(response.getTimeRange().getFrom()).isEqualTo(LocalDate.of(2026, 5, 1));
-        assertThat(response.getTimeRange().getTo()).isEqualTo(LocalDate.of(2026, 5, 31));
+        assertThat(response.getTimeRange().from()).isEqualTo(LocalDate.of(2026, 5, 1));
+        assertThat(response.getTimeRange().to()).isEqualTo(LocalDate.of(2026, 5, 31));
         assertThat(response.getTerms()).isNotEmpty();
     }
 }

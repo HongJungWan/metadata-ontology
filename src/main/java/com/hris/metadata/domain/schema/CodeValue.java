@@ -1,6 +1,7 @@
 package com.hris.metadata.domain.schema;
 
 import com.hris.metadata.global.common.BaseEntity;
+import com.hris.metadata.shared.ddd.AggregateRoot;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
@@ -22,6 +23,7 @@ import java.util.UUID;
  * 특정 컬럼이 가질 수 있는 코드값(예: 정산상태 PENDING/SETTLED)과 그 한글 라벨·동의어를 담는다.
  * 스키마 카탈로그는 식별자(schemaCatalogId)로만 참조한다 (애그리거트 간 ID 참조).
  */
+@AggregateRoot
 @Entity
 @Table(name = "code_value", schema = "meta",
         indexes = @Index(name = "idx_code_value_catalog_id", columnList = "schema_catalog_id"))
@@ -53,6 +55,32 @@ public class CodeValue extends BaseEntity {
     /** 코드값 동의어 (콤마 구분 문자열, 예: "미정산,대기") */
     @Column(name = "synonyms", length = 500)
     private String synonyms;
+
+    /**
+     * 코드값 생성 (불변식 강제).
+     * <p>
+     * schemaCatalogId 는 필수, code 는 공백일 수 없으며 대문자로 정규화한다.
+     * id 는 application 레이어에서 생성해 주입한다.
+     */
+    public static CodeValue create(UUID codeValueId, UUID schemaCatalogId, String code,
+                                   String label, String synonyms) {
+        if (codeValueId == null) {
+            throw new IllegalArgumentException("codeValueId 는 필수입니다.");
+        }
+        if (schemaCatalogId == null) {
+            throw new IllegalArgumentException("schemaCatalogId 는 필수입니다.");
+        }
+        if (code == null || code.isBlank()) {
+            throw new IllegalArgumentException("code 는 공백일 수 없습니다.");
+        }
+        return CodeValue.builder()
+                .codeValueId(codeValueId)
+                .schemaCatalogId(schemaCatalogId)
+                .code(code.trim().toUpperCase())
+                .label(label)
+                .synonyms(synonyms)
+                .build();
+    }
 
     /** 코드값 필드 수정 (JPA dirty checking) */
     public void update(String code, String label, String synonyms) {

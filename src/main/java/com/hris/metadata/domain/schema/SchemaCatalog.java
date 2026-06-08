@@ -59,6 +59,33 @@ public class SchemaCatalog extends BaseEntity {
     @Column(name = "source_system", length = 100)
     private String sourceSystem;
 
+    /**
+     * 스키마 카탈로그 생성 (불변식 강제).
+     * <p>
+     * physicalTable·physicalColumn 은 공백일 수 없다.
+     * id 는 application 레이어에서 생성해 주입한다.
+     */
+    public static SchemaCatalog create(UUID schemaCatalogId, String physicalTable, String physicalColumn,
+                                       String dataType, String description, String sourceSystem) {
+        if (schemaCatalogId == null) {
+            throw new IllegalArgumentException("schemaCatalogId 는 필수입니다.");
+        }
+        if (physicalTable == null || physicalTable.isBlank()) {
+            throw new IllegalArgumentException("physicalTable 은 공백일 수 없습니다.");
+        }
+        if (physicalColumn == null || physicalColumn.isBlank()) {
+            throw new IllegalArgumentException("physicalColumn 은 공백일 수 없습니다.");
+        }
+        return SchemaCatalog.builder()
+                .schemaCatalogId(schemaCatalogId)
+                .physicalTable(physicalTable)
+                .physicalColumn(physicalColumn)
+                .dataType(dataType)
+                .description(description)
+                .sourceSystem(sourceSystem)
+                .build();
+    }
+
     /** 카탈로그 필드 수정 (JPA dirty checking) */
     public void update(String physicalTable, String physicalColumn, String dataType,
                        String description, String sourceSystem) {

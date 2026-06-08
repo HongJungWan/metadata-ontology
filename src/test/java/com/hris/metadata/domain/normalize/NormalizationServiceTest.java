@@ -21,12 +21,12 @@ class NormalizationServiceTest {
 
         NormalizationResult result = service.normalize("미정산 가맹점 지난달", today);
 
-        TimeRange range = result.getTimeRange();
+        TimeRange range = result.timeRange();
         assertThat(range).isNotNull();
-        assertThat(range.getFrom()).isEqualTo(LocalDate.of(2026, 5, 1));
-        assertThat(range.getTo()).isEqualTo(LocalDate.of(2026, 5, 31));
-        assertThat(result.getMatchedExpression()).isEqualTo("지난달");
-        assertThat(result.getResidualQuery()).isEqualTo("미정산 가맹점");
+        assertThat(range.from()).isEqualTo(LocalDate.of(2026, 5, 1));
+        assertThat(range.to()).isEqualTo(LocalDate.of(2026, 5, 31));
+        assertThat(result.matchedExpression()).isEqualTo("지난달");
+        assertThat(result.residualQuery()).isEqualTo("미정산 가맹점");
     }
 
     @Test
@@ -36,8 +36,8 @@ class NormalizationServiceTest {
 
         NormalizationResult result = service.normalize("지난달 정산", today);
 
-        assertThat(result.getTimeRange().getFrom()).isEqualTo(LocalDate.of(2025, 12, 1));
-        assertThat(result.getTimeRange().getTo()).isEqualTo(LocalDate.of(2025, 12, 31));
+        assertThat(result.timeRange().from()).isEqualTo(LocalDate.of(2025, 12, 1));
+        assertThat(result.timeRange().to()).isEqualTo(LocalDate.of(2025, 12, 31));
     }
 
     @Test
@@ -47,8 +47,8 @@ class NormalizationServiceTest {
 
         NormalizationResult result = service.normalize("이번달 수수료", today);
 
-        assertThat(result.getTimeRange().getFrom()).isEqualTo(LocalDate.of(2026, 2, 1));
-        assertThat(result.getTimeRange().getTo()).isEqualTo(LocalDate.of(2026, 2, 28));
+        assertThat(result.timeRange().from()).isEqualTo(LocalDate.of(2026, 2, 1));
+        assertThat(result.timeRange().to()).isEqualTo(LocalDate.of(2026, 2, 28));
     }
 
     @Test
@@ -58,8 +58,8 @@ class NormalizationServiceTest {
 
         NormalizationResult result = service.normalize("최근 7일 정산", today);
 
-        assertThat(result.getTimeRange().getFrom()).isEqualTo(LocalDate.of(2026, 6, 1));
-        assertThat(result.getTimeRange().getTo()).isEqualTo(LocalDate.of(2026, 6, 7));
+        assertThat(result.timeRange().from()).isEqualTo(LocalDate.of(2026, 6, 1));
+        assertThat(result.timeRange().to()).isEqualTo(LocalDate.of(2026, 6, 7));
     }
 
     @Test
@@ -70,8 +70,8 @@ class NormalizationServiceTest {
 
         NormalizationResult result = service.normalize("지난주 정산", today);
 
-        assertThat(result.getTimeRange().getFrom()).isEqualTo(LocalDate.of(2026, 5, 25));
-        assertThat(result.getTimeRange().getTo()).isEqualTo(LocalDate.of(2026, 5, 31));
+        assertThat(result.timeRange().from()).isEqualTo(LocalDate.of(2026, 5, 25));
+        assertThat(result.timeRange().to()).isEqualTo(LocalDate.of(2026, 5, 31));
     }
 
     @Test
@@ -79,7 +79,7 @@ class NormalizationServiceTest {
     void noExpression() {
         NormalizationResult result = service.normalize("미정산 가맹점", LocalDate.of(2026, 6, 7));
 
-        assertThat(result.getTimeRange()).isNull();
-        assertThat(result.getResidualQuery()).isEqualTo("미정산 가맹점");
+        assertThat(result.timeRange()).isNull();
+        assertThat(result.residualQuery()).isEqualTo("미정산 가맹점");
     }
 }
