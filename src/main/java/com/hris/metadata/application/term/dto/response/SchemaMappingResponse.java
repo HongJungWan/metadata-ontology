@@ -1,4 +1,4 @@
-package com.hris.metadata.presentation.term.dto.response;
+package com.hris.metadata.application.term.dto.response;
 
 import com.hris.metadata.domain.mapping.SchemaMapping;
 import io.swagger.v3.oas.annotations.media.Schema;

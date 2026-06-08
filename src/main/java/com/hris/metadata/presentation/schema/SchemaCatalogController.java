@@ -1,10 +1,10 @@
 package com.hris.metadata.presentation.schema;
 
 import com.hris.metadata.application.schema.SchemaCatalogService;
-import com.hris.metadata.presentation.schema.dto.request.CodeValueRequest;
-import com.hris.metadata.presentation.schema.dto.request.SchemaCatalogRequest;
-import com.hris.metadata.presentation.schema.dto.response.CodeValueResponse;
-import com.hris.metadata.presentation.schema.dto.response.SchemaCatalogResponse;
+import com.hris.metadata.application.schema.dto.request.CodeValueRequest;
+import com.hris.metadata.application.schema.dto.request.SchemaCatalogRequest;
+import com.hris.metadata.application.schema.dto.response.CodeValueResponse;
+import com.hris.metadata.application.schema.dto.response.SchemaCatalogResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;

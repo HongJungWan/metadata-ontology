@@ -1,4 +1,4 @@
-package com.hris.metadata.presentation.schema.dto.response;
+package com.hris.metadata.application.schema.dto.response;
 
 import com.hris.metadata.domain.schema.SchemaCatalog;
 import io.swagger.v3.oas.annotations.media.Schema;

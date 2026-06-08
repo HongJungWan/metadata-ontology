@@ -1,4 +1,4 @@
-package com.hris.metadata.presentation.pattern.dto.response;
+package com.hris.metadata.application.pattern.dto.response;
 
 import com.hris.metadata.domain.pattern.PatternOperator;
 import com.hris.metadata.domain.pattern.SqlPattern;
