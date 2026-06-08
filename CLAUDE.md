@@ -41,3 +41,12 @@
 - **매핑 모델**: `Term↔SchemaCatalog` 조인은 단일 `SchemaMapping` 엔티티 하나로 둔다(별도 `TermSchemaMap` 없음).
 - **`/resolve`의 코드값**: 표면형이 코드값 동의어면(예: "미정산"→PENDING) `columnMappings[].codeValue`에 채워 내려준다(PRD §4.1). 용어와 무관한 순수 코드값 토큰은 `/match-sql-pattern`이 담당.
 - **DDL**: H2 `create-drop`. 운영은 `validate` + 별도 스키마 관리.
+
+## DDD 하네스 (opinionated-harness-template)
+
+> 코드 작성·수정 시 `.claude/hooks/harness.mjs`가 자동 검사한다. 상세는 `docs/HARNESS.md`. 카파시 4원칙과 같은 철학.
+
+- **레이어 매핑(이 프로젝트 기준)**: `entity`=domain · `service`/`*Service`=application · `repository`=infrastructure · `controller`/`dto`=presentation. (`.claude/hooks/harness.config.json`)
+- **차단(block) 규칙**: 엔티티(domain)에 `@Service`/`@Transactional`/`@Setter`/`@Data`/public setter/`.now()`/`UUID.randomUUID()` 금지 · 빈약 엔티티 금지 · 필드주입(`@Autowired`) 금지(생성자 주입) · application→infra 임포트 금지 · `./gradlew`만 사용.
+- 현재 전 소스 **차단 0건**(엔티티에 행위 메서드 보유, 서비스는 application 분류).
+- **커맨드**: `/ddd-review` · `/ddd-fix` · `/verify`. 훅 실행에 Node.js 필요.
