@@ -2,6 +2,8 @@ package com.hris.metadata.domain.mapping;
 
 import com.hris.metadata.global.common.BaseEntity;
 import com.hris.metadata.shared.ddd.AggregateRoot;
+import com.hris.metadata.shared.ddd.Subdomain;
+import com.hris.metadata.shared.ddd.SubdomainType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
@@ -26,6 +28,7 @@ import java.util.UUID;
  * Term/SchemaCatalog 는 다른 애그리거트 루트이므로 객체 참조 없이 식별자(ID)로만 참조한다.
  */
 @AggregateRoot
+@Subdomain(SubdomainType.SUPPORTING)
 @Entity
 @Table(name = "schema_mapping", schema = "meta",
         indexes = {

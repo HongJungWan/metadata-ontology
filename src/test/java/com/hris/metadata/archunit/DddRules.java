@@ -6,6 +6,8 @@ import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.noClasses;
 
 import com.hris.metadata.shared.ddd.AggregateInternal;
 import com.hris.metadata.shared.ddd.AggregateRoot;
+import com.hris.metadata.shared.ddd.Subdomain;
+import com.hris.metadata.shared.ddd.SubdomainType;
 import com.hris.metadata.shared.ddd.ValueObject;
 import com.tngtech.archunit.core.domain.Dependency;
 import com.tngtech.archunit.core.domain.JavaClass;
@@ -74,6 +76,56 @@ public final class DddRules {
             .should(haveAPublicStaticFactoryReturningSelf())
             .as("[DDD_AGGREGATE_ROOT_HAS_FACTORY] 애그리거트 루트는 정적 팩토리 메서드 보유")
             .allowEmptyShould(false);
+
+    /**
+     * 전략적 설계: CORE 서브도메인(@Subdomain(CORE))은 GENERIC 서브도메인(@Subdomain(GENERIC))에 의존하지 않는다.
+     * (Term/Synonym 이 SqlPattern 에 의존 금지 — 핵심이 범용/대체가능 영역에 얽히는 것을 차단.)
+     */
+    public static final ArchRule CORE_NOT_DEPEND_ON_GENERIC = classes().that()
+            .areAnnotatedWith(Subdomain.class).and(hasSubdomain(SubdomainType.CORE))
+            .should(notDependOnGenericSubdomain())
+            .as("[DDD_CORE_NOT_DEPEND_ON_GENERIC] CORE 서브도메인은 GENERIC 서브도메인에 의존하지 않는다")
+            .allowEmptyShould(false);
+
+    /**
+     * 입력 모델 명명: application 레이어의 요청 입력은 *Command 로 통일한다(*Request 잔존 금지, DDD 2.3).
+     */
+    public static final ArchRule REQUEST_INPUT_IS_COMMAND = noClasses().that()
+            .resideInAPackage("..application..")
+            .should().haveSimpleNameEndingWith("Request")
+            .as("[DDD_REQUEST_INPUT_IS_COMMAND] application 입력 모델은 *Command (잔존 *Request 금지)")
+            .allowEmptyShould(false);
+
+    private static com.tngtech.archunit.base.DescribedPredicate<JavaClass> hasSubdomain(SubdomainType type) {
+        return new com.tngtech.archunit.base.DescribedPredicate<>("@Subdomain(" + type + ")") {
+            @Override
+            public boolean test(JavaClass clazz) {
+                return clazz.tryGetAnnotationOfType(Subdomain.class)
+                        .map(s -> s.value() == type).orElse(false);
+            }
+        };
+    }
+
+    private static boolean isGenericSubdomain(JavaClass clazz) {
+        return clazz.tryGetAnnotationOfType(Subdomain.class)
+                .map(s -> s.value() == SubdomainType.GENERIC).orElse(false);
+    }
+
+    private static ArchCondition<JavaClass> notDependOnGenericSubdomain() {
+        return new ArchCondition<>("not depend on @Subdomain(GENERIC) classes") {
+            @Override
+            public void check(JavaClass clazz, ConditionEvents events) {
+                for (Dependency dep : clazz.getDirectDependenciesFromSelf()) {
+                    JavaClass target = dep.getTargetClass().getBaseComponentType();
+                    if (!target.equals(clazz) && isGenericSubdomain(target)) {
+                        events.add(SimpleConditionEvent.violated(dep,
+                                clazz.getSimpleName() + " (CORE) depends on GENERIC subdomain "
+                                        + target.getSimpleName()));
+                    }
+                }
+            }
+        };
+    }
 
     private static ArchCondition<JavaClass> onlyBeAccessedWithinSameAggregate() {
         return new ArchCondition<>("only be accessed within the same aggregate (package)") {

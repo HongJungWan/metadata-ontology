@@ -2,6 +2,8 @@ package com.hris.metadata.domain.term;
 
 import com.hris.metadata.global.common.BaseEntity;
 import com.hris.metadata.shared.ddd.AggregateRoot;
+import com.hris.metadata.shared.ddd.Subdomain;
+import com.hris.metadata.shared.ddd.SubdomainType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -25,6 +27,7 @@ import java.util.UUID;
  * 같은 개념을 팀마다 다르게 부르는 표현을 하나의 정식 명칭(canonicalName)으로 모으는 SSOT 기준점이다.
  */
 @AggregateRoot
+@Subdomain(SubdomainType.CORE)
 @Entity
 @Table(name = "term", schema = "meta",
         uniqueConstraints = @UniqueConstraint(name = "uk_term_canonical_name", columnNames = "canonical_name"))
@@ -83,16 +86,27 @@ public class Term extends BaseEntity {
                 .build();
     }
 
-    /** 용어 필드 수정 (JPA dirty checking) */
+    /** 용어 필드 수정 (JPA dirty checking). 상태 전이는 changeStatus 의 라이프사이클 규칙을 따른다. */
     public void update(String canonicalName, String domain, String definition, TermStatus status) {
         this.canonicalName = canonicalName;
         this.domain = domain;
         this.definition = definition;
-        this.status = status;
+        changeStatus(status);
     }
 
-    /** 상태 변경 (검토 후 활성화 등) */
+    /**
+     * 상태 변경 (검토 후 활성화 등). 허용되지 않은 전이는 {@link IllegalStateException} 으로 거부한다.
+     *
+     * @see TermStatus#canTransitionTo(TermStatus)
+     */
     public void changeStatus(TermStatus status) {
+        if (status == null) {
+            throw new IllegalArgumentException("status 는 필수입니다.");
+        }
+        if (this.status != null && !this.status.canTransitionTo(status)) {
+            throw new IllegalStateException(
+                    "허용되지 않은 상태 전이입니다: " + this.status + " → " + status);
+        }
         this.status = status;
     }
 }

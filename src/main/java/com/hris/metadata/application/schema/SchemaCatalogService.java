@@ -6,8 +6,8 @@ import com.hris.metadata.domain.schema.SchemaCatalog;
 import com.hris.metadata.domain.schema.SchemaCatalogRepository;
 import com.hris.metadata.global.exception.BusinessException;
 import com.hris.metadata.global.exception.ErrorCode;
-import com.hris.metadata.application.schema.dto.request.CodeValueRequest;
-import com.hris.metadata.application.schema.dto.request.SchemaCatalogRequest;
+import com.hris.metadata.application.schema.command.AddCodeValueCommand;
+import com.hris.metadata.application.schema.command.RegisterSchemaCatalogCommand;
 import com.hris.metadata.application.schema.dto.response.CodeValueResponse;
 import com.hris.metadata.application.schema.dto.response.SchemaCatalogResponse;
 import lombok.RequiredArgsConstructor;
@@ -34,10 +34,10 @@ public class SchemaCatalogService {
     // ===== SchemaCatalog =====
 
     @Transactional
-    public SchemaCatalogResponse createCatalog(SchemaCatalogRequest request) {
-        SchemaCatalog catalog = SchemaCatalog.create(UUID.randomUUID(), request.getPhysicalTable(),
-                request.getPhysicalColumn(), request.getDataType(),
-                request.getDescription(), request.getSourceSystem());
+    public SchemaCatalogResponse createCatalog(RegisterSchemaCatalogCommand command) {
+        SchemaCatalog catalog = SchemaCatalog.create(UUID.randomUUID(), command.physicalTable(),
+                command.physicalColumn(), command.dataType(),
+                command.description(), command.sourceSystem());
         schemaCatalogRepository.save(catalog);
         return SchemaCatalogResponse.from(catalog);
     }
@@ -47,10 +47,10 @@ public class SchemaCatalogService {
     }
 
     @Transactional
-    public SchemaCatalogResponse updateCatalog(UUID schemaCatalogId, SchemaCatalogRequest request) {
+    public SchemaCatalogResponse updateCatalog(UUID schemaCatalogId, RegisterSchemaCatalogCommand command) {
         SchemaCatalog catalog = getCatalogOrThrow(schemaCatalogId);
-        catalog.update(request.getPhysicalTable(), request.getPhysicalColumn(), request.getDataType(),
-                request.getDescription(), request.getSourceSystem());
+        catalog.update(command.physicalTable(), command.physicalColumn(), command.dataType(),
+                command.description(), command.sourceSystem());
         return SchemaCatalogResponse.from(catalog);
     }
 
@@ -62,10 +62,10 @@ public class SchemaCatalogService {
     // ===== CodeValue =====
 
     @Transactional
-    public CodeValueResponse createCodeValue(CodeValueRequest request) {
-        getCatalogOrThrow(request.getSchemaCatalogId());
-        CodeValue codeValue = CodeValue.create(UUID.randomUUID(), request.getSchemaCatalogId(),
-                request.getCode(), request.getLabel(), request.getSynonyms());
+    public CodeValueResponse createCodeValue(AddCodeValueCommand command) {
+        getCatalogOrThrow(command.schemaCatalogId());
+        CodeValue codeValue = CodeValue.create(UUID.randomUUID(), command.schemaCatalogId(),
+                command.code(), command.label(), command.synonyms());
         codeValueRepository.save(codeValue);
         return CodeValueResponse.from(codeValue);
     }

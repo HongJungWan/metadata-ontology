@@ -3,9 +3,9 @@ package com.hris.metadata.presentation.term;
 import com.hris.metadata.application.term.DictionaryImportService;
 import com.hris.metadata.application.term.ImportResult;
 import com.hris.metadata.application.term.TermAdminService;
-import com.hris.metadata.application.term.dto.request.SchemaMappingRequest;
-import com.hris.metadata.application.term.dto.request.SynonymRequest;
-import com.hris.metadata.application.term.dto.request.TermRequest;
+import com.hris.metadata.application.term.command.AddSynonymCommand;
+import com.hris.metadata.application.term.command.CreateTermCommand;
+import com.hris.metadata.application.term.command.MapTermToColumnCommand;
 import com.hris.metadata.application.term.dto.response.SchemaMappingResponse;
 import com.hris.metadata.application.term.dto.response.SynonymResponse;
 import com.hris.metadata.application.term.dto.response.TermResponse;
@@ -46,8 +46,8 @@ public class TermAdminController {
 
     @Operation(summary = "표준 용어 생성")
     @PostMapping("/terms")
-    public ResponseEntity<TermResponse> createTerm(@Valid @RequestBody TermRequest request) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(termAdminService.createTerm(request));
+    public ResponseEntity<TermResponse> createTerm(@Valid @RequestBody CreateTermCommand command) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(termAdminService.createTerm(command));
     }
 
     @Operation(summary = "표준 용어 목록 조회")
@@ -65,8 +65,8 @@ public class TermAdminController {
     @Operation(summary = "표준 용어 수정")
     @PutMapping("/terms/{termId}")
     public ResponseEntity<TermResponse> updateTerm(@PathVariable UUID termId,
-                                                   @Valid @RequestBody TermRequest request) {
-        return ResponseEntity.ok(termAdminService.updateTerm(termId, request));
+                                                   @Valid @RequestBody CreateTermCommand command) {
+        return ResponseEntity.ok(termAdminService.updateTerm(termId, command));
     }
 
     @Operation(summary = "표준 용어 승인 (검토 후 ACTIVE 활성화)")
@@ -86,8 +86,8 @@ public class TermAdminController {
 
     @Operation(summary = "동의어 생성")
     @PostMapping("/synonyms")
-    public ResponseEntity<SynonymResponse> createSynonym(@Valid @RequestBody SynonymRequest request) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(termAdminService.createSynonym(request));
+    public ResponseEntity<SynonymResponse> createSynonym(@Valid @RequestBody AddSynonymCommand command) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(termAdminService.createSynonym(command));
     }
 
     @Operation(summary = "용어별 동의어 목록 조회")
@@ -108,8 +108,8 @@ public class TermAdminController {
     @Operation(summary = "용어-스키마 매핑 생성")
     @PostMapping("/mappings")
     public ResponseEntity<SchemaMappingResponse> createMapping(
-            @Valid @RequestBody SchemaMappingRequest request) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(termAdminService.createMapping(request));
+            @Valid @RequestBody MapTermToColumnCommand command) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(termAdminService.createMapping(command));
     }
 
     @Operation(summary = "용어별 매핑 목록 조회")
