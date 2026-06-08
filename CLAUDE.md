@@ -42,11 +42,22 @@
 - **`/resolve`의 코드값**: 표면형이 코드값 동의어면(예: "미정산"→PENDING) `columnMappings[].codeValue`에 채워 내려준다(PRD §4.1). 용어와 무관한 순수 코드값 토큰은 `/match-sql-pattern`이 담당.
 - **DDL**: H2 `create-drop`. 운영은 `validate` + 별도 스키마 관리.
 
-## DDD 하네스 (opinionated-harness-template)
+## DDD 하네스 (opinionated-harness-template, DEFAULT 설정)
 
-> 코드 작성·수정 시 `.claude/hooks/harness.mjs`가 자동 검사한다. 상세는 `docs/HARNESS.md`. 카파시 4원칙과 같은 철학.
+> 코드 작성·수정 시 `.claude/hooks/harness.mjs`가 자동 검사한다(설정: `.claude/hooks/harness.config.json`, **DEFAULT/verbatim**). 상세는 `docs/HARNESS.md`. 카파시 4원칙과 같은 철학. CI 정밀 게이트는 ArchUnit(`.github/workflows/ddd-archunit.yml`).
 
-- **레이어 매핑(이 프로젝트 기준)**: `entity`=domain · `service`/`*Service`=application · `repository`=infrastructure · `controller`/`dto`=presentation. (`.claude/hooks/harness.config.json`)
-- **차단(block) 규칙**: 엔티티(domain)에 `@Service`/`@Transactional`/`@Setter`/`@Data`/public setter/`.now()`/`UUID.randomUUID()` 금지 · 빈약 엔티티 금지 · 필드주입(`@Autowired`) 금지(생성자 주입) · application→infra 임포트 금지 · `./gradlew`만 사용.
-- 현재 전 소스 **차단 0건**(엔티티에 행위 메서드 보유, 서비스는 application 분류).
+### 패키지 구조 (실용 레이어드 헥사고날 + DDD, 루트 `com.hris.metadata`)
+| 레이어 | 글롭 | 내용 |
+|---|---|---|
+| `shared.ddd` | — | 마커 어노테이션 5종 (`@AggregateRoot` 등) |
+| `domain` | `**/domain/**` | 엔티티·VO·도메인 record·**포트(plain interface)**. 바깥 레이어 의존 금지. |
+| `application` | `**/application/**` | `@Service` 오케스트레이션. 도메인 포트에만 의존(+ 서로). 결과 홀더(NormalizationResult/ExpansionResult/SqlPatternMatch/ImportResult) 포함. |
+| `infrastructure` | `**/infrastructure/**` | 포트 어댑터 `*RepositoryImpl`(+ Spring Data `*JpaRepository`/QueryDSL), config, DataSeeder, catalogsync. |
+| `presentation` | `**/controller/**`,`**/presentation/**` | 컨트롤러 + 모든 DTO(request/response, TimeRange/ResolveResponse 포함). |
+
+- **애그리거트 루트(`@AggregateRoot`)**: `Term`·`SchemaCatalog`·`SchemaMapping`·`SqlPattern`만. `Synonym`/`CodeValue`는 plain `@Entity`(여러 레이어에서 읽힘).
+- **루트 간 참조는 ID로**: 엔티티는 다른 루트를 객체 필드로 참조하지 않는다(`@ManyToOne` 제거, `termId`/`schemaCatalogId`만). 조인 결과는 도메인 record(`ColumnMapping`/`CodeValueCandidate`/`SynonymMatch`)로 평면화해 포트가 반환.
+- **DIP**: 도메인엔 포트 인터페이스만, 구현(`*RepositoryImpl`)은 infrastructure. `*RepositoryImpl`/`*RepositoryCustomImpl` 파일명은 domain 에서 금지.
+- **차단(block) 규칙**: domain 에 `@Service`/`@Transactional`/`@Setter`/`@Data`/public setter/`.now()`/`UUID.randomUUID()` 금지 · 빈약 엔티티 금지 · domain→application/infra 임포트 금지 · application→infra 임포트 금지 · 필드주입(`@Autowired`/`@Value` 필드) 금지(생성자 주입) · `./gradlew`만 사용. (`UUID.randomUUID()`/`LocalDate.now()`는 application/infra 에선 허용.)
+- 현재 전 소스 **차단 0건**, `./gradlew clean build`·ArchUnit GREEN.
 - **커맨드**: `/ddd-review` · `/ddd-fix` · `/verify`. 훅 실행에 Node.js 필요.
