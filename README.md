@@ -1,95 +1,94 @@
 # metadata-ontology
 
-도메인 용어와 물리 스키마를 잇는 **경량 온톨로지 메타데이터 계층** (정산/Settlement 도메인).
-자연어 질의를 물리 컬럼·코드값·기간으로 매핑하고, LLM 에 줄 스키마 설명 블록을 생성한다.
+사람이 쓰는 말과 데이터베이스 사이를 이어주는 '용어 사전' 서비스예요. "미정산"이나 "지난달" 같은 표현을 표준 용어와 실제 데이터 항목, 날짜 범위로 바꿔줘요. 형제 서비스인 knowledge-search가 검색에 들어가기 전에 질문을 제대로 알아듣도록 거들어 줘요.
 
-- **스택**: Java 21 · Spring Boot 3.5.5 · JPA · QueryDSL 5.1.0 · springdoc-openapi 2.7.0
-- **포트**: `8096`
-- **루트 패키지**: `com.hris.metadata`
+이 문서는 이 서비스가 무엇을 하고 어떻게 짜여 있는지 한 바퀴 둘러봐요.
 
-> 소비자(P1, knowledge-search)가 REST 로 호출하는 독립 서비스. SQL 조립·실행·랭킹은 소비자 몫이며,
-> 본 서비스는 매핑·정규화·패턴·스키마 설명까지만 제공한다. 캐싱도 소비자 측(Caffeine) 책임.
+<br>
+<br>
 
-## 로컬 실행
+## 한눈에 — 어떻게 동작하나
 
-기본/LOCAL 프로필은 **H2 in-memory** 로 부팅한다 (외부 의존성 없음). 부팅 시 정산 사전 시드가 자동 적재된다.
+질문 문구가 들어오면 표준 용어로 정리하고, 그게 어느 데이터 항목·코드값에 해당하는지 이어 줘요. "지난달" 같은 말은 실제 날짜 범위로 바꾸고요. 이 모두를 **한 번의 호출로 모아서** 돌려줘요.
+
+직접 데이터베이스를 뒤지거나 검색을 실행하진 않아요. 그 일은 결과를 받아 가는 쪽(knowledge-search)의 몫이에요. 이 서비스는 "이 말은 이런 뜻이고, 여기에 해당해요"까지만 알려줘요.
+
+```mermaid
+flowchart LR
+    A["질문 문구<br/>예: 미정산 가맹점 지난달"] --> B["표준 용어로 정리<br/>(동의어 펴기)"]
+    B --> C["어느 항목·코드값인지 잇기"]
+    C --> D["기간 표현을 날짜 범위로"]
+    D --> E["한 번에 모아서 돌려주기"]
+    E --> F["knowledge-search가 받아 검색에 사용"]
+```
+
+<br>
+<br>
+
+## 무엇으로 이뤄져 있나
+
+**사전 내용**
+
+정산 도메인에서 쓰는 말들을 정리해 담아 둬요.
+
+- 표준 용어 — 같은 뜻의 여러 표현을 하나의 정식 이름으로 모아요.
+- 동의어 — 줄임말, 오타, 구어체처럼 실제로 쓰는 표현을 표준 용어로 이어 줘요.
+- 데이터 항목 목록과 코드값 — 어떤 데이터가 있고, 어떤 값을 가질 수 있는지 적어 둬요.
+- 용어와 항목의 연결 — 어떤 말이 어떤 데이터 항목에 해당하는지 묶어 둬요.
+- 자주 쓰는 질의 패턴 — 특정 표현이 나오면 어떤 항목·조건으로 풀어야 하는지 규칙으로 둬요.
+
+**한 번에 해결하는 입구**
+
+부르는 쪽이 한 번만 호출하면 표준 용어 정리, 항목 연결, 날짜 범위, 설명까지 모아서 받아요. 기능별로 따로 부를 수 있는 입구도 있어요. 동의어만 펴기, 기간 표현만 날짜로 바꾸기, 표현을 조건 후보로 풀기, 그리고 AI에게 건넬 데이터 설명 만들기 같은 것들이요.
+
+**사전 관리 입구**
+
+용어와 동의어, 연결을 더하고 고칠 수 있어요. 표 형태 파일로 한꺼번에 올려 넣는 것도 돼요.
+
+<br>
+<br>
+
+## 레포에는 뭐가 들어있나
+
+코드는 역할에 따라 네 겹으로 나눠 뒀어요.
+
+- **핵심 규칙** — 용어와 연결, 표현을 다듬는 규칙처럼 사전의 본질을 담은 부분이에요.
+- **흐름 조율** — 정리·연결·기간 변환을 한 번의 호출로 묶어 줘요.
+- **바깥 연결** — 사전을 저장하고, 처음 띄울 때 기본 사전을 채워 넣는 일을 맡아요.
+- **입구** — 바깥에서 호출하는 REST 길이에요.
+
+폴더로 보면 이렇게 놓여 있어요.
+
+| 위치 | 무엇 |
+|---|---|
+| `src` | 위 네 겹으로 나뉜 서비스 코드예요. |
+| `docs` | 설계와 점검 장치를 정리한 문서예요. |
+| `.claude` | 코드가 설계 규칙을 지키게 잡아주는 가드레일(하네스)이에요. |
+| `.github` | 코드를 올릴 때 구조를 한 번 더 확인하는 검사예요. |
+| `scripts` | 점검 장치가 제대로 도는지 빠르게 확인하는 용도예요. |
+
+설계 규칙을 자동으로 잡아주는 장치는 [opinionated-harness-template](https://github.com/HongJungWan/opinionated-harness-template)을 그대로 얹은 거예요. 자세한 쓰임새는 [`docs/HARNESS.md`](docs/HARNESS.md)에 있어요.
+
+<br>
+<br>
+
+## 지금은 어디까지
+
+- 지금은 내 컴퓨터에서 가벼운 임시 데이터베이스로만 떠요. 처음 띄울 때 정산 사전 기본값이 자동으로 채워져서, 바로 시험해 볼 수 있어요.
+- 운영용 데이터베이스나 외부 데이터 목록과의 연동은 아직 붙이지 않았고, 들어갈 자리만 잡아 뒀어요. 실제 접속 값은 나중에 채워요.
+- 접속 정보는 환경변수로만 넣어요. 비밀번호 같은 값을 코드에 직접 적는 건 금지예요.
+
+<br>
+<br>
+
+## 시작하기와 문서
+
+JDK 21 이상이 있으면 바로 띄울 수 있어요.
 
 ```bash
 ./gradlew bootRun
-# 포트 8096
 ```
 
-- Health: http://localhost:8096/health
-- Swagger UI: http://localhost:8096/swagger-ui.html
-- H2 Console: http://localhost:8096/h2-console  (JDBC URL: `jdbc:h2:mem:metadb`, user `sa`, 빈 비밀번호)
+서버는 `8096` 포트로 떠요. 살아있는지는 `/health`, 어떤 기능이 있는지는 `/swagger-ui.html`에서 둘러볼 수 있어요.
 
-```bash
-./gradlew test          # 단위 테스트 (NormalizationService, ExpansionService)
-./gradlew compileJava   # 컴파일 검증
-```
-
-## 매핑·확장 API (§4)
-
-| Method | Path | 설명 |
-|---|---|---|
-| POST | `/api/resolve` | 정규화+동의어확장+컬럼/코드값 매핑 (P1 한 방 호출) |
-| POST | `/api/expand` | 동의어를 표준 용어로 확장 |
-| POST | `/api/normalize` | "지난달" 등 상대 기간을 날짜 범위로 |
-| POST | `/api/match-sql-pattern` | 키워드 → 컬럼·연산자·값 후보 |
-| POST | `/api/prompt-context` | LLM 에 줄 스키마 설명 블록 |
-
-### 관리 API (§5)
-- `POST/GET/PUT/DELETE /api/admin/terms`, `/api/admin/terms/{id}/approve`, `/api/admin/synonyms`, `/api/admin/mappings`
-- `POST /api/admin/import` (CSV 일괄 임포트, `text/plain`)
-- `/api/admin/schema/catalogs`, `/api/admin/schema/code-values`
-- `/api/admin/sql-patterns`
-
-## 예시: `/api/resolve`
-
-```bash
-curl -X POST http://localhost:8096/api/resolve \
-  -H 'Content-Type: application/json' \
-  -d '{"query": "미정산 가맹점 지난달"}'
-```
-
-응답 (기준일 2026-06-07 가정):
-
-```json
-{
-  "normalizedQuery": "정산상태 가맹점 2026-05-01~2026-05-31",
-  "terms": [
-    { "canonical": "정산상태", "matchedSurface": "미정산" },
-    { "canonical": "가맹점", "matchedSurface": null }
-  ],
-  "columnMappings": [
-    { "physicalTable": "settlement", "physicalColumn": "settlement_status", "codeValue": null },
-    { "physicalTable": "settlement", "physicalColumn": "merchant_id", "codeValue": null }
-  ],
-  "timeRange": { "from": "2026-05-01", "to": "2026-05-31" },
-  "unmapped": []
-}
-```
-
-> `미정산` 은 동의어 사전에서 표준 용어 `정산상태` 로 확장된다. 컬럼 단위로 `미정산→PENDING` 코드값을
-> 더 정밀하게 묶고 싶으면 `/api/match-sql-pattern` (`"미정산" → settlement_status EQ 'PENDING'`) 을 함께 쓴다.
-
-## AWS / PostgreSQL (현재 미연결 — TODO)
-
-- 본 서비스는 아직 외부 DB/AWS 에 연결되지 않았다. **모든 프로필은 H2 로 부팅**한다.
-- 실제 PostgreSQL `meta` 스키마 datasource 는 `application.yml` 하단에 `# TODO(AWS):` 주석 블록으로 보관 — 값 확정 후 `prod` 프로필로 활성화한다.
-- Glue Data Catalog / Redshift `information_schema` 동기화는 `catalog.sync.enabled: false` (기본) 플래그 뒤에 있으며 `CatalogSyncService.sync()` 에 `// TODO(AWS)` 가드가 있다. 켜도 현재는 미구현이다.
-- 자격증명은 환경변수/EC2 환경 파일로 주입한다. **저장소 평문 커밋 금지.**
-
-## 데이터 모델 (§3)
-
-| 엔티티 | 핵심 필드 |
-|---|---|
-| `Term` | canonicalName(unique), domain, definition, status(ACTIVE/DRAFT/DEPRECATED) |
-| `Synonym` | term, surface, type(ABBREVIATION/KOR_ENG/TYPO/COLLOQUIAL) |
-| `SchemaCatalog` | physicalTable, physicalColumn, dataType, description, sourceSystem |
-| `CodeValue` | schemaCatalog, code, label, synonyms |
-| `SchemaMapping` | term, schemaCatalog, mappingType, codeValueRule (Term↔SchemaCatalog 조인) |
-| `SqlPattern` | triggerKeywords, columnTarget, operator(EQ/IN/GTE/LTE/LIKE/BETWEEN), valueTemplate, priority |
-
-> `SchemaMapping` 은 (term + schemaCatalog + mappingType + codeValueRule) 단일 조인 엔티티로 구현했다
-> (PRD ER 의 TERM_SCHEMA_MAP 역할을 겸함). 한 용어가 여러 컬럼에, 한 컬럼이 여러 용어에 걸릴 수 있다.
+설계와 점검 장치를 더 알고 싶으면 [`docs/HARNESS.md`](docs/HARNESS.md)를 보면 돼요.
