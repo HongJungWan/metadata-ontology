@@ -47,7 +47,7 @@ public class PromptContextService {
      */
     public String buildFromQuery(String query) {
         ExpansionResult expanded = expansionService.expand(query);
-        List<Term> terms = resolveTerms(expanded.getExpandedQuery());
+        List<Term> terms = resolveTerms(expanded.expandedQuery());
         return build(terms);
     }
 

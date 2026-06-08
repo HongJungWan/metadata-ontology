@@ -14,7 +14,6 @@ import com.hris.metadata.domain.term.SynonymRepository;
 import com.hris.metadata.domain.term.SynonymType;
 import com.hris.metadata.domain.term.Term;
 import com.hris.metadata.domain.term.TermRepository;
-import com.hris.metadata.domain.term.TermStatus;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.CommandLineRunner;
@@ -79,13 +78,7 @@ public class DataSeeder implements CommandLineRunner {
 
     private UUID saveTerm(String canonicalName, String definition) {
         UUID id = UUID.randomUUID();
-        termRepository.save(Term.builder()
-                .termId(id)
-                .canonicalName(canonicalName)
-                .domain("settlement")
-                .definition(definition)
-                .status(TermStatus.ACTIVE)
-                .build());
+        termRepository.save(Term.create(id, canonicalName, "settlement", definition));
         return id;
     }
 
@@ -100,12 +93,7 @@ public class DataSeeder implements CommandLineRunner {
     }
 
     private void saveSynonym(UUID termId, String surface, SynonymType type) {
-        synonymRepository.save(Synonym.builder()
-                .synonymId(UUID.randomUUID())
-                .termId(termId)
-                .surface(surface)
-                .type(type)
-                .build());
+        synonymRepository.save(Synonym.create(UUID.randomUUID(), termId, surface, type));
     }
 
     private Map<String, UUID> seedCatalog() {
@@ -121,14 +109,8 @@ public class DataSeeder implements CommandLineRunner {
 
     private UUID saveCatalog(String column, String dataType, String description) {
         UUID id = UUID.randomUUID();
-        schemaCatalogRepository.save(SchemaCatalog.builder()
-                .schemaCatalogId(id)
-                .physicalTable("settlement")
-                .physicalColumn(column)
-                .dataType(dataType)
-                .description(description)
-                .sourceSystem("redshift")
-                .build());
+        schemaCatalogRepository.save(SchemaCatalog.create(
+                id, "settlement", column, dataType, description, "redshift"));
         return id;
     }
 
@@ -140,13 +122,7 @@ public class DataSeeder implements CommandLineRunner {
     }
 
     private void saveCodeValue(UUID catalogId, String code, String label, String synonyms) {
-        codeValueRepository.save(CodeValue.builder()
-                .codeValueId(UUID.randomUUID())
-                .schemaCatalogId(catalogId)
-                .code(code)
-                .label(label)
-                .synonyms(synonyms)
-                .build());
+        codeValueRepository.save(CodeValue.create(UUID.randomUUID(), catalogId, code, label, synonyms));
     }
 
     private void seedMappings(Map<String, UUID> termIds, Map<String, UUID> catalogIds) {
@@ -159,13 +135,8 @@ public class DataSeeder implements CommandLineRunner {
     }
 
     private void saveMapping(UUID termId, UUID catalogId, String mappingType, String codeValueRule) {
-        schemaMappingRepository.save(SchemaMapping.builder()
-                .schemaMappingId(UUID.randomUUID())
-                .termId(termId)
-                .schemaCatalogId(catalogId)
-                .mappingType(mappingType)
-                .codeValueRule(codeValueRule)
-                .build());
+        schemaMappingRepository.save(SchemaMapping.create(
+                UUID.randomUUID(), termId, catalogId, mappingType, codeValueRule));
     }
 
     private void seedSqlPatterns() {
@@ -177,13 +148,7 @@ public class DataSeeder implements CommandLineRunner {
 
     private void savePattern(String keywords, String column, PatternOperator operator,
                              String valueTemplate, int priority) {
-        sqlPatternRepository.save(SqlPattern.builder()
-                .sqlPatternId(UUID.randomUUID())
-                .triggerKeywords(keywords)
-                .columnTarget(column)
-                .operator(operator)
-                .valueTemplate(valueTemplate)
-                .priority(priority)
-                .build());
+        sqlPatternRepository.save(SqlPattern.create(
+                UUID.randomUUID(), keywords, column, operator, valueTemplate, priority));
     }
 }

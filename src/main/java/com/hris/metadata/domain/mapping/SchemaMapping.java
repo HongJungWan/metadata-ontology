@@ -61,6 +61,32 @@ public class SchemaMapping extends BaseEntity {
     @Column(name = "code_value_rule", length = 200)
     private String codeValueRule;
 
+    /**
+     * 매핑 생성 (불변식 강제).
+     * <p>
+     * termId·schemaCatalogId 는 필수다.
+     * id 는 application 레이어에서 생성해 주입한다.
+     */
+    public static SchemaMapping create(UUID schemaMappingId, UUID termId, UUID schemaCatalogId,
+                                       String mappingType, String codeValueRule) {
+        if (schemaMappingId == null) {
+            throw new IllegalArgumentException("schemaMappingId 는 필수입니다.");
+        }
+        if (termId == null) {
+            throw new IllegalArgumentException("termId 는 필수입니다.");
+        }
+        if (schemaCatalogId == null) {
+            throw new IllegalArgumentException("schemaCatalogId 는 필수입니다.");
+        }
+        return SchemaMapping.builder()
+                .schemaMappingId(schemaMappingId)
+                .termId(termId)
+                .schemaCatalogId(schemaCatalogId)
+                .mappingType(mappingType)
+                .codeValueRule(codeValueRule)
+                .build();
+    }
+
     /** 매핑 필드 수정 (JPA dirty checking) */
     public void update(String mappingType, String codeValueRule) {
         this.mappingType = mappingType;

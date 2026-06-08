@@ -35,14 +35,9 @@ public class SchemaCatalogService {
 
     @Transactional
     public SchemaCatalogResponse createCatalog(SchemaCatalogRequest request) {
-        SchemaCatalog catalog = SchemaCatalog.builder()
-                .schemaCatalogId(UUID.randomUUID())
-                .physicalTable(request.getPhysicalTable())
-                .physicalColumn(request.getPhysicalColumn())
-                .dataType(request.getDataType())
-                .description(request.getDescription())
-                .sourceSystem(request.getSourceSystem())
-                .build();
+        SchemaCatalog catalog = SchemaCatalog.create(UUID.randomUUID(), request.getPhysicalTable(),
+                request.getPhysicalColumn(), request.getDataType(),
+                request.getDescription(), request.getSourceSystem());
         schemaCatalogRepository.save(catalog);
         return SchemaCatalogResponse.from(catalog);
     }
@@ -69,13 +64,8 @@ public class SchemaCatalogService {
     @Transactional
     public CodeValueResponse createCodeValue(CodeValueRequest request) {
         getCatalogOrThrow(request.getSchemaCatalogId());
-        CodeValue codeValue = CodeValue.builder()
-                .codeValueId(UUID.randomUUID())
-                .schemaCatalogId(request.getSchemaCatalogId())
-                .code(request.getCode())
-                .label(request.getLabel())
-                .synonyms(request.getSynonyms())
-                .build();
+        CodeValue codeValue = CodeValue.create(UUID.randomUUID(), request.getSchemaCatalogId(),
+                request.getCode(), request.getLabel(), request.getSynonyms());
         codeValueRepository.save(codeValue);
         return CodeValueResponse.from(codeValue);
     }

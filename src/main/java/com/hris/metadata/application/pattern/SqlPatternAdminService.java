@@ -25,14 +25,9 @@ public class SqlPatternAdminService {
 
     @Transactional
     public SqlPatternResponse create(SqlPatternRequest request) {
-        SqlPattern pattern = SqlPattern.builder()
-                .sqlPatternId(UUID.randomUUID())
-                .triggerKeywords(request.getTriggerKeywords())
-                .columnTarget(request.getColumnTarget())
-                .operator(request.getOperator())
-                .valueTemplate(request.getValueTemplate())
-                .priority(request.getPriority())
-                .build();
+        SqlPattern pattern = SqlPattern.create(UUID.randomUUID(), request.getTriggerKeywords(),
+                request.getColumnTarget(), request.getOperator(),
+                request.getValueTemplate(), request.getPriority());
         sqlPatternRepository.save(pattern);
         return SqlPatternResponse.from(pattern);
     }

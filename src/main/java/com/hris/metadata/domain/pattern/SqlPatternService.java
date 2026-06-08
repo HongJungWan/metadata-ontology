@@ -39,7 +39,7 @@ public class SqlPatternService {
             addMatchesForKeyword(keyword, seen, matches);
         }
 
-        matches.sort(Comparator.comparingInt(SqlPatternMatch::getPriority));
+        matches.sort(Comparator.comparingInt(SqlPatternMatch::priority));
         return matches;
     }
 

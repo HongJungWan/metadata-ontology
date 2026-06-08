@@ -80,8 +80,20 @@ public class DictionaryImportService {
         }
 
         Optional<Term> existing = termRepository.findByCanonicalName(columns[0]);
-        Term term = existing.orElseGet(() -> createTerm(columns));
-        int createdTerms = existing.isEmpty() ? 1 : 0;
+        Term term;
+        int createdTerms;
+        if (existing.isPresent()) {
+            term = existing.get();
+            createdTerms = 0;
+        } else {
+            try {
+                term = createTerm(columns);
+            } catch (IllegalArgumentException e) {
+                skipped.add("행 " + rowNumber + ": " + e.getMessage());
+                return RowResult.none();
+            }
+            createdTerms = 1;
+        }
         int createdSynonyms = createSynonymIfPresent(term.getTermId(), columns, rowNumber, skipped);
         return new RowResult(createdTerms, createdSynonyms);
     }
@@ -96,13 +108,10 @@ public class DictionaryImportService {
     }
 
     private Term createTerm(String[] columns) {
-        Term term = Term.builder()
-                .termId(UUID.randomUUID())
-                .canonicalName(columns[0])
-                .domain(columns[1].isBlank() ? null : columns[1])
-                .definition(columns[2].isBlank() ? null : columns[2])
-                .status(TermStatus.DRAFT)
-                .build();
+        Term term = Term.create(UUID.randomUUID(), columns[0],
+                columns[1].isBlank() ? null : columns[1],
+                columns[2].isBlank() ? null : columns[2]);
+        term.changeStatus(TermStatus.DRAFT);
         termRepository.save(term);
         return term;
     }
@@ -112,12 +121,7 @@ public class DictionaryImportService {
             return 0;
         }
         SynonymType type = parseType(columns[4], rowNumber, skipped);
-        Synonym synonym = Synonym.builder()
-                .synonymId(UUID.randomUUID())
-                .termId(termId)
-                .surface(columns[3])
-                .type(type)
-                .build();
+        Synonym synonym = Synonym.create(UUID.randomUUID(), termId, columns[3], type);
         synonymRepository.save(synonym);
         return 1;
     }

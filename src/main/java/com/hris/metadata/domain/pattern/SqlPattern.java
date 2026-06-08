@@ -61,6 +61,36 @@ public class SqlPattern extends BaseEntity {
     @Column(name = "priority", nullable = false)
     private int priority;
 
+    /**
+     * SQL 패턴 생성 (불변식 강제).
+     * <p>
+     * triggerKeywords·columnTarget 은 공백일 수 없고 operator 는 필수다.
+     * id 는 application 레이어에서 생성해 주입한다.
+     */
+    public static SqlPattern create(UUID sqlPatternId, String triggerKeywords, String columnTarget,
+                                    PatternOperator operator, String valueTemplate, int priority) {
+        if (sqlPatternId == null) {
+            throw new IllegalArgumentException("sqlPatternId 는 필수입니다.");
+        }
+        if (triggerKeywords == null || triggerKeywords.isBlank()) {
+            throw new IllegalArgumentException("triggerKeywords 는 공백일 수 없습니다.");
+        }
+        if (columnTarget == null || columnTarget.isBlank()) {
+            throw new IllegalArgumentException("columnTarget 은 공백일 수 없습니다.");
+        }
+        if (operator == null) {
+            throw new IllegalArgumentException("operator 는 필수입니다.");
+        }
+        return SqlPattern.builder()
+                .sqlPatternId(sqlPatternId)
+                .triggerKeywords(triggerKeywords)
+                .columnTarget(columnTarget)
+                .operator(operator)
+                .valueTemplate(valueTemplate)
+                .priority(priority)
+                .build();
+    }
+
     /** SQL 패턴 필드 수정 (JPA dirty checking) */
     public void update(String triggerKeywords, String columnTarget, PatternOperator operator,
                        String valueTemplate, int priority) {
