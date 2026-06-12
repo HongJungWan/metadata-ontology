@@ -54,8 +54,22 @@ public class ResolveService {
      * 질의를 해석한다 (기준일 명시 — 테스트용).
      */
     public ResolveResponse resolve(String query, LocalDate today) {
-        NormalizationResult normalized = normalizationService.normalize(query, today);
-        ExpansionResult expanded = expansionService.expand(normalized.residualQuery());
+        return resolve(query, today, ResolveOptions.full());
+    }
+
+    /**
+     * 질의를 해석한다 (단계 토글 명시 — 재현율 평가용).
+     * <p>
+     * 토글을 끄면 해당 단계를 항등 변환으로 대체한다: 정규화 off 는 기간 미추출(원문 유지),
+     * 확장 off 는 원문 토큰 그대로 용어 조회. 평가의 baseline/full 이 같은 경로를 타게 한다.
+     */
+    public ResolveResponse resolve(String query, LocalDate today, ResolveOptions options) {
+        NormalizationResult normalized = options.normalizeTime()
+                ? normalizationService.normalize(query, today)
+                : new NormalizationResult(null, query, null);
+        ExpansionResult expanded = options.expandSynonyms()
+                ? expansionService.expand(normalized.residualQuery())
+                : new ExpansionResult(normalized.residualQuery(), List.of());
 
         ResolvedTerms resolvedTerms = resolveTerms(expanded);
         List<ResolveResponse.ColumnMapping> columnMappings =
