@@ -49,6 +49,26 @@ public class GlobalExceptionHandler {
                 .body(ErrorResponse.of(ErrorCode.INVALID_INPUT_VALUE, message));
     }
 
+    /**
+     * 도메인 불변식 위반(IllegalArgumentException)은 잘못된 입력 문제이므로 400 으로 응답한다.
+     */
+    @ExceptionHandler(IllegalArgumentException.class)
+    protected ResponseEntity<ErrorResponse> handleIllegalArgument(IllegalArgumentException e) {
+        log.warn("IllegalArgumentException: {}", e.getMessage());
+        return ResponseEntity.status(ErrorCode.INVALID_INPUT_VALUE.getHttpStatus())
+                .body(ErrorResponse.of(ErrorCode.INVALID_INPUT_VALUE, e.getMessage()));
+    }
+
+    /**
+     * 상태 전이 위반(IllegalStateException)은 현재 리소스 상태와의 충돌이므로 409 로 응답한다.
+     */
+    @ExceptionHandler(IllegalStateException.class)
+    protected ResponseEntity<ErrorResponse> handleIllegalState(IllegalStateException e) {
+        log.warn("IllegalStateException: {}", e.getMessage());
+        return ResponseEntity.status(ErrorCode.INVALID_STATE.getHttpStatus())
+                .body(ErrorResponse.of(ErrorCode.INVALID_STATE, e.getMessage()));
+    }
+
     @ExceptionHandler(Exception.class)
     protected ResponseEntity<ErrorResponse> handleException(Exception e) {
         log.error("Unhandled exception", e);

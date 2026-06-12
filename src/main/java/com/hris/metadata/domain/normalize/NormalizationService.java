@@ -18,7 +18,7 @@ import java.util.regex.Pattern;
 public class NormalizationService {
 
     /** "최근 N일" 패턴 (예: "최근 7일") */
-    private static final Pattern RECENT_DAYS = Pattern.compile("최근\\s*(\\d+)\\s*일");
+    private static final Pattern RECENT_DAYS = Pattern.compile("최근\\s*(\\d{1,4})\\s*일"); // 자릿수 제한 — 과대 입력의 NumberFormatException(500) 방지
 
     /**
      * 질의를 정규화한다 (기준일 명시).
@@ -41,7 +41,7 @@ public class NormalizationService {
             return new NormalizationResult(range, stripExpression(query, expression), expression);
         }
 
-        // 2. 고정 키워드 매칭 (가장 먼저 등장하는 표현 채택)
+        // 2. 고정 키워드 매칭 (키워드 배열 우선순위 순으로 첫 매칭 채택(질의 내 등장 위치가 아님))
         for (String keyword : fixedKeywords()) {
             if (query.contains(keyword)) {
                 TimeRange range = resolveFixed(keyword, today);

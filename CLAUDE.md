@@ -32,19 +32,19 @@
 
 - 헬스 `/health` · Swagger `/swagger-ui.html`
 - 핵심 API: `POST /api/resolve`(한 방 호출) · `/api/expand` · `/api/normalize` · `/api/match-sql-pattern` · `/api/prompt-context`
-- 관리: `TermAdminController` CRUD + `POST /api/admin/import`(CSV)
+- 관리: `TermAdminController` CRUD + `POST /api/admin/import`(CSV) · 평가: `GET /api/admin/evaluation/recall`(BASELINE vs FULL 재현율, `docs/evaluation-recall.md`)
 - 예시: `POST /api/resolve {"query":"미정산 가맹점 지난달"}` → `settlement_status` 컬럼에 `codeValue:"PENDING"` + 기간 정규화
 
 ## 작업 시 주의 (이 프로젝트 고유)
 - **AWS·운영 DB 미연동**: 운영 PostgreSQL `meta` 스키마와 Glue/Redshift `information_schema` 동기화는 `application.yml`에 `# TODO(AWS)` 주석. `catalog.sync.enabled` 기본 `false`. 실값은 사용자가 나중에 기재 — **임의로 켜지 마라.**
-- **H2 시드**: `DataSeeder`(`@Profile("local")`)가 정산 사전(용어 6/동의어 7/코드값 4/패턴 4)을 적재. `create-drop`이라 재시작 시 초기화.
+- **H2 시드**: `DataSeeder`(`@Profile("local")`)가 `src/main/resources/seed/settlement/*.csv` 사전(용어 184/동의어 292/카탈로그 123컬럼/코드값 96/매핑 152/패턴 34)을 적재. `create-drop`이라 재시작 시 초기화. 시드 무결성·수치 하한은 `SeedDictionaryIntegrityTest` 가 강제 — **CSV 수정 시 이 테스트부터 돌려라.**
 - **매핑 모델**: `Term↔SchemaCatalog` 조인은 단일 `SchemaMapping` 엔티티 하나로 둔다(별도 `TermSchemaMap` 없음).
 - **`/resolve`의 코드값**: 표면형이 코드값 동의어면(예: "미정산"→PENDING) `columnMappings[].codeValue`에 채워 내려준다(PRD §4.1). 용어와 무관한 순수 코드값 토큰은 `/match-sql-pattern`이 담당.
 - **DDL**: H2 `create-drop`. 운영은 `validate` + 별도 스키마 관리.
 
 ## DDD 하네스 (opinionated-harness-template, DEFAULT 설정)
 
-> 코드 작성·수정 시 `.claude/hooks/harness.mjs`가 자동 검사한다(설정: `.claude/hooks/harness.config.json`, **DEFAULT/verbatim**). 상세는 `docs/HARNESS.md`. 카파시 4원칙과 같은 철학. CI 정밀 게이트는 ArchUnit(`.github/workflows/ddd-archunit.yml`).
+> 코드 작성·수정 시 `.claude/hooks/harness.mjs`가 자동 검사한다(설정: `.claude/hooks/harness.config.json`, **DEFAULT 기반(단, checks 9종은 전부 block 으로 조임)**). 상세는 `docs/HARNESS.md`. 카파시 4원칙과 같은 철학. CI 정밀 게이트는 ArchUnit(`.github/workflows/ddd-archunit.yml`).
 
 ### 패키지 구조 (실용 레이어드 헥사고날 + DDD, 루트 `com.hris.metadata`)
 | 레이어 | 글롭 | 내용 |
@@ -72,7 +72,7 @@
 | SchemaCatalog (스키마 카탈로그) | 물리 테이블·컬럼 메타데이터. |
 | CodeValue (코드값) | 컬럼이 가질 수 있는 코드(PENDING 등)와 라벨·동의어. |
 | SchemaMapping (매핑) | Term ↔ 물리 컬럼 조인. |
-| SqlPattern (SQL 패턴) | 트리거 키워드 → 컬럼·연산자·값 후보 규칙. |
+| SqlPattern (SQL 패턴) | 트리거 키워드 → 컬럼·연산자·값 후보 규칙. **SQL 문자열 조립·실행은 하지 않는다 — 그건 knowledge-search(P1) 몫.** |
 | Resolve (해석) | normalize→expand→map 을 한 번에 수행해 질의를 컬럼·코드값·기간으로 푼다. |
 | Command (커맨드) | application 입력 모델(record). 의도를 드러내는 이름(CreateTermCommand 등). |
 - **루트 간 참조는 ID로**: 엔티티는 다른 루트를 객체 필드로 참조하지 않는다(`@ManyToOne` 제거, `termId`/`schemaCatalogId`만). 조인 결과는 도메인 record(`ColumnMapping`/`CodeValueCandidate`/`SynonymMatch`)로 평면화해 포트가 반환.
@@ -81,7 +81,7 @@
 - **DIP**: 도메인엔 포트 인터페이스만, 구현(`*RepositoryImpl`)은 infrastructure. `*RepositoryImpl`/`*RepositoryCustomImpl` 파일명은 domain 에서 금지.
 - **도메인 서비스(`@DomainService`)**: 순수 도메인 로직(Normalization/Expansion/SqlPattern 매칭)은 domain 에 plain 클래스로 둔다. Spring 스테레오타입 금지(가드 차단) → `infrastructure.config.DomainServiceConfig` 의 `@Bean` 으로 등록. 무상태(주입 포트는 `final`)만 허용. `LocalDate.now()` 등 시계는 도메인에서 호출 금지 → 호출자(application/presentation)가 기준일을 주입.
 - **차단(block) 규칙**: domain 에 `@Service`/`@Transactional`/`@Setter`/`@Data`/public setter/`.now()`/`UUID.randomUUID()` 금지 · 빈약 엔티티 금지 · domain→application/infra 임포트 금지 · application→infra 임포트 금지 · 필드주입(`@Autowired`/`@Value` 필드) 금지(생성자 주입) · `./gradlew`만 사용. (`UUID.randomUUID()`/`LocalDate.now()`는 application/infra 에선 허용.)
-- 현재 전 소스 **차단 0건**, `./gradlew clean build`·ArchUnit(10 규칙: 기존 8 + `CORE_NOT_DEPEND_ON_GENERIC`·`REQUEST_INPUT_IS_COMMAND`) GREEN.
+- 현재 전 소스 **차단 0건**, `./gradlew clean build`·ArchUnit(11 규칙: 기존 8 + `CORE_NOT_DEPEND_ON_GENERIC`·`REQUEST_INPUT_IS_COMMAND`·`APPLICATION_NOT_DEPEND_ON_INFRASTRUCTURE`) GREEN.
 - **슬래시 커맨드**: `/ddd-review` · `/ddd-fix` · `/verify`. 훅 실행에 Node.js 필요.
 
 ### Deferred (근거)

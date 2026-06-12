@@ -21,7 +21,7 @@
 
 ```
 ┌─────────────────────────┐        REST (HTTP/JSON)        ┌──────────────────────────┐
-│   knowledge-search (P1)  │ ─────────  consumes  ────────▶ │   metadata-ontology (P0)   │
+│   knowledge-search (P1)  │ ─────────  consumes  ────────▶ │   metadata-ontology (P2)   │
 │   (자연어→SQL 소비자)     │   /api/resolve · /expand ...   │   = 우리(공급자, OHS)       │
 └─────────────────────────┘                                 └──────────────────────────┘
 ```

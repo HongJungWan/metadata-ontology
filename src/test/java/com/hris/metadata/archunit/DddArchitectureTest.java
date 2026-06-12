@@ -5,7 +5,7 @@ import com.tngtech.archunit.junit.AnalyzeClasses;
 import com.tngtech.archunit.junit.ArchTest;
 import com.tngtech.archunit.lang.ArchRule;
 
-/** 드롭인 게이트: 프로덕션 코드(com.example, 테스트 제외)에 DDD 구조 규칙을 정밀 강제. */
+/** 드롭인 게이트: 프로덕션 코드(com.hris.metadata, 테스트 제외)에 DDD 구조 규칙을 정밀 강제. */
 @AnalyzeClasses(packages = "com.hris.metadata", importOptions = ImportOption.DoNotIncludeTests.class)
 class DddArchitectureTest {
     @ArchTest static final ArchRule domainPurity = DddRules.DOMAIN_PURITY;
@@ -18,4 +18,5 @@ class DddArchitectureTest {
     @ArchTest static final ArchRule aggregateRootHasFactory = DddRules.AGGREGATE_ROOT_HAS_FACTORY;
     @ArchTest static final ArchRule coreNotDependOnGeneric = DddRules.CORE_NOT_DEPEND_ON_GENERIC;
     @ArchTest static final ArchRule requestInputIsCommand = DddRules.REQUEST_INPUT_IS_COMMAND;
+    @ArchTest static final ArchRule applicationNotDependOnInfra = DddRules.APPLICATION_NOT_DEPEND_ON_INFRASTRUCTURE;
 }

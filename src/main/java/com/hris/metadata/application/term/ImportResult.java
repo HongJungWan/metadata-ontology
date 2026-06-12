@@ -20,6 +20,6 @@ public class ImportResult {
     @Schema(description = "신규 생성된 동의어 수", example = "5")
     private int createdSynonyms;
 
-    @Schema(description = "건너뛴 행 (이미 존재/오류)")
+    @Schema(description = "건너뛰거나 보정된 행 (행 번호+사유)")
     private List<String> skipped;
 }

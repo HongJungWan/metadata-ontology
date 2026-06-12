@@ -22,4 +22,10 @@ public record BuildPromptContextCommand(
         @Schema(description = "표준 용어명 목록 (query 대신 직접 지정)", example = "[\"정산상태\", \"가맹점\"]")
         List<String> terms
 ) {
+    public BuildPromptContextCommand {
+        // 역직렬화 단계에서 실행 — HttpMessageNotReadableException 으로 감싸여 기존 400 매핑 경로를 탄다.
+        if ((query == null || query.isBlank()) && (terms == null || terms.isEmpty())) {
+            throw new IllegalArgumentException("query 또는 terms 중 하나는 필요합니다");
+        }
+    }
 }

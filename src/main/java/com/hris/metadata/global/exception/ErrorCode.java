@@ -11,9 +11,9 @@ import org.springframework.http.HttpStatus;
 @RequiredArgsConstructor
 public enum ErrorCode {
 
-    // Common (400 / 500)
+    // Common (400 / 409 / 500)
     INVALID_INPUT_VALUE(HttpStatus.BAD_REQUEST, "잘못된 입력값입니다."),
-    INVALID_DATE_EXPRESSION(HttpStatus.BAD_REQUEST, "해석할 수 없는 기간 표현입니다."),
+    INVALID_STATE(HttpStatus.CONFLICT, "허용되지 않는 상태 전이입니다."),
     INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "서버 내부 오류가 발생했습니다."),
 
     // Term / Synonym (404 / 409)

@@ -39,7 +39,7 @@ class ResolveServiceIntegrationTest {
     }
 
     @Test
-    @DisplayName("'미정산 가맹점 지난달' → 기간 2026-05-01~2026-05-31, 용어 매핑 존재")
+    @DisplayName("'미정산 가맹점 지난달' → 기간 2026-05-01~2026-05-31, 용어 해석·컬럼 매핑 존재")
     void resolveWithTimeRange() {
         ResolveResponse response = resolveService.resolve("미정산 가맹점 지난달", LocalDate.of(2026, 6, 7));
 
@@ -47,5 +47,6 @@ class ResolveServiceIntegrationTest {
         assertThat(response.getTimeRange().from()).isEqualTo(LocalDate.of(2026, 5, 1));
         assertThat(response.getTimeRange().to()).isEqualTo(LocalDate.of(2026, 5, 31));
         assertThat(response.getTerms()).isNotEmpty();
+        assertThat(response.getColumnMappings()).isNotEmpty();
     }
 }

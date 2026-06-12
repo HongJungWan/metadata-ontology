@@ -21,8 +21,7 @@ import com.tngtech.archunit.lang.SimpleConditionEvent;
 import com.tngtech.archunit.library.GeneralCodingRules;
 
 /**
- * cross-file 구조 규칙을 *정밀* 강제(훅의 휴리스틱과 달리 전체 클래스 그래프 분석). 드롭인용.
- * 실제 프로젝트 적용 시 각 규칙을 {@code FreezingArchRule.freeze(...)} 로 감싸 baseline 래칫 권장(ARCHUNIT.md).
+ * cross-file 구조 규칙을 *정밀* 강제(훅의 휴리스틱과 달리 전체 클래스 그래프 분석).
  */
 public final class DddRules {
     private DddRules() {}
@@ -94,6 +93,13 @@ public final class DddRules {
             .resideInAPackage("..application..")
             .should().haveSimpleNameEndingWith("Request")
             .as("[DDD_REQUEST_INPUT_IS_COMMAND] application 입력 모델은 *Command (잔존 *Request 금지)")
+            .allowEmptyShould(false); // @RestController 실재 — vacuous 통과 금지
+
+    /** 레이어 경계: application 은 infrastructure 에 의존하지 않는다(포트 사용 — DIP). 훅(휴리스틱)만 막던 경계를 CI 권위 게이트로도 강제한다. */
+    public static final ArchRule APPLICATION_NOT_DEPEND_ON_INFRASTRUCTURE = noClasses().that()
+            .resideInAPackage("..application..")
+            .should().dependOnClassesThat().resideInAnyPackage("..infrastructure..", "..infra..")
+            .as("[DDD_APP_NOT_DEPEND_ON_INFRA] application 은 infrastructure 에 의존하지 않는다(포트 사용)")
             .allowEmptyShould(false);
 
     private static com.tngtech.archunit.base.DescribedPredicate<JavaClass> hasSubdomain(SubdomainType type) {

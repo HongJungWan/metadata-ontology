@@ -74,6 +74,11 @@ public class DictionaryImportService {
 
     private RowResult importRow(String line, int rowNumber, List<String> skipped) {
         String[] columns = splitRow(line);
+        if (columns.length != COLUMN_COUNT) {
+            // 컬럼 수가 다르면 자동 보정하지 않고 건너뛴다 — 조용한 데이터 손상 방지.
+            skipped.add("행 " + rowNumber + ": 컬럼 수 불일치");
+            return RowResult.none();
+        }
         if (columns[0].isBlank()) {
             skipped.add("행 " + rowNumber + ": canonicalName 누락");
             return RowResult.none();
@@ -99,10 +104,9 @@ public class DictionaryImportService {
     }
 
     private String[] splitRow(String line) {
-        String[] raw = line.split(",", -1);
-        String[] columns = new String[COLUMN_COUNT];
-        for (int i = 0; i < COLUMN_COUNT; i++) {
-            columns[i] = i < raw.length ? raw[i].trim() : "";
+        String[] columns = line.split(",", -1);
+        for (int i = 0; i < columns.length; i++) {
+            columns[i] = columns[i].trim();
         }
         return columns;
     }

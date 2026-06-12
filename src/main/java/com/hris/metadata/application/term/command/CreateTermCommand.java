@@ -17,6 +17,7 @@ public record CreateTermCommand(
         @Schema(description = "정식 명칭", example = "정산금액", requiredMode = Schema.RequiredMode.REQUIRED)
         String canonicalName,
 
+        @NotBlank(message = "도메인(domain)은 필수입니다.")
         @JsonProperty("domain")
         @Schema(description = "도메인", example = "settlement")
         String domain,

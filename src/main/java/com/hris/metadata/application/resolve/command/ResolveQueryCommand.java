@@ -17,7 +17,7 @@ public record ResolveQueryCommand(
         String query,
 
         @JsonProperty("domain")
-        @Schema(description = "도메인 (선택)", example = "settlement")
+        @Schema(description = "도메인 (선택) (현재 미사용 — 향후 도메인 필터용 예약)", example = "settlement")
         String domain
 ) {
     public ResolveQueryCommand {

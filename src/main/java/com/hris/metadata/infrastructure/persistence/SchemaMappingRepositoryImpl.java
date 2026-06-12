@@ -70,6 +70,8 @@ public class SchemaMappingRepositoryImpl implements SchemaMappingRepository {
                 .join(term).on(mapping.termId.eq(term.termId))
                 .join(catalog).on(mapping.schemaCatalogId.eq(catalog.schemaCatalogId))
                 .where(mapping.termId.in(termIds))
+                // PromptContextService 의 테이블 헤더 그룹핑이 행 연속성에 의존 — 정렬로 보장
+                .orderBy(catalog.physicalTable.asc(), catalog.physicalColumn.asc())
                 .fetch();
     }
 }
