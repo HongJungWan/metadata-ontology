@@ -1,0 +1,124 @@
+physicalTable,physicalColumn,dataType,description,sourceSystem
+settlement,settlement_id,varchar,정산 식별자,redshift
+settlement,settlement_amount,numeric,정산 금액 (원),redshift
+settlement,settlement_status,varchar,정산 상태 코드,redshift
+settlement,fee_amount,numeric,수수료 금액 (원),redshift
+settlement,payout_date,date,지급일,redshift
+settlement,merchant_id,varchar,가맹점 식별자,redshift
+settlement,settlement_cycle,varchar,정산 주기 코드,redshift
+settlement,settlement_date,date,정산 기준일,redshift
+settlement,scheduled_payout_date,date,지급 예정일,redshift
+settlement,confirmed_at,timestamp,정산 확정 일시,redshift
+settlement,sales_amount,numeric,매출 금액 (원),redshift
+settlement,refund_amount,numeric,환불 금액 (원),redshift
+settlement,adjustment_amount,numeric,조정 반영 금액 (원),redshift
+settlement,fee_vat_amount,numeric,수수료 부가세 (원),redshift
+settlement,withholding_tax_amount,numeric,원천징수 세액 (원),redshift
+settlement,currency_code,varchar,통화 코드 (ISO 4217),redshift
+settlement,pg_company,varchar,PG사 코드,redshift
+settlement,deduction_amount,numeric,차감 금액 (원),redshift
+settlement,carryover_amount,numeric,이월 금액 (원),redshift
+settlement,settlement_round,integer,정산 회차,redshift
+settlement,promotion_support_amount,numeric,프로모션 지원 분담금 (원),redshift
+settlement,coupon_discount_amount,numeric,쿠폰 할인 분담금 (원),redshift
+settlement,point_used_amount,numeric,포인트 사용 분담금 (원),redshift
+settlement,created_at,timestamp,생성 일시,redshift
+merchant,merchant_id,varchar,가맹점 식별자,redshift
+merchant,merchant_name,varchar,가맹점명,redshift
+merchant,business_no,varchar,사업자등록번호,redshift
+merchant,representative_name,varchar,대표자명,redshift
+merchant,merchant_status,varchar,가맹점 상태 코드,redshift
+merchant,contract_type,varchar,계약 유형 코드,redshift
+merchant,join_date,date,입점일,redshift
+merchant,close_date,date,해지일,redshift
+merchant,settlement_cycle,varchar,정산 주기 코드,redshift
+merchant,bank_code,varchar,지급 계좌 은행 코드,redshift
+merchant,account_no,varchar,지급 계좌번호,redshift
+merchant,account_holder,varchar,예금주명,redshift
+merchant,contact_email,varchar,정산 담당자 이메일,redshift
+merchant,contact_phone,varchar,정산 담당자 연락처,redshift
+merchant,merchant_grade,varchar,가맹점 등급 코드,redshift
+merchant,category_code,varchar,업종 코드,redshift
+merchant,brand_name,varchar,브랜드명,redshift
+merchant,vendor_code,varchar,협력사 코드,redshift
+merchant,tax_type,varchar,과세 유형 코드,redshift
+merchant,updated_at,timestamp,수정 일시,redshift
+payout,payout_id,varchar,지급 식별자,redshift
+payout,settlement_id,varchar,정산 식별자,redshift
+payout,merchant_id,varchar,가맹점 식별자,redshift
+payout,payout_status,varchar,지급 상태 코드,redshift
+payout,payout_amount,numeric,지급 금액 (원),redshift
+payout,payout_date,date,지급일,redshift
+payout,payout_scheduled_date,date,지급 예정일,redshift
+payout,bank_code,varchar,지급 은행 코드,redshift
+payout,account_no,varchar,지급 계좌번호,redshift
+payout,fail_reason_code,varchar,지급 실패 사유 코드,redshift
+payout,retry_count,integer,지급 재시도 횟수,redshift
+payout,payout_method,varchar,지급 수단 코드,redshift
+payout,tax_withheld_yn,varchar,원천징수 적용 여부 (Y/N),redshift
+payout,completed_at,timestamp,지급 완료 일시,redshift
+payout,created_at,timestamp,생성 일시,redshift
+payment_transaction,transaction_id,varchar,거래 식별자,redshift
+payment_transaction,merchant_id,varchar,가맹점 식별자,redshift
+payment_transaction,settlement_id,varchar,정산 식별자,redshift
+payment_transaction,pg_company,varchar,PG사 코드,redshift
+payment_transaction,payment_method,varchar,결제 수단 코드,redshift
+payment_transaction,transaction_status,varchar,거래 상태 코드,redshift
+payment_transaction,transaction_amount,numeric,거래 금액 (원),redshift
+payment_transaction,refund_amount,numeric,환불 금액 (원),redshift
+payment_transaction,approval_no,varchar,승인 번호,redshift
+payment_transaction,approved_at,timestamp,승인 일시,redshift
+payment_transaction,canceled_at,timestamp,취소 일시,redshift
+payment_transaction,card_company,varchar,카드사 코드,redshift
+payment_transaction,installment_months,integer,할부 개월 수,redshift
+payment_transaction,currency_code,varchar,통화 코드 (ISO 4217),redshift
+payment_transaction,order_no,varchar,주문 번호,redshift
+payment_transaction,escrow_yn,varchar,에스크로 적용 여부 (Y/N),redshift
+payment_transaction,partial_cancel_yn,varchar,부분취소 여부 (Y/N),redshift
+payment_transaction,pg_fee_amount,numeric,PG 수수료 금액 (원),redshift
+payment_transaction,foreign_amount,numeric,외화 결제 금액,redshift
+payment_transaction,created_at,timestamp,생성 일시,redshift
+fee_policy,fee_policy_id,varchar,수수료 정책 식별자,redshift
+fee_policy,merchant_id,varchar,가맹점 식별자,redshift
+fee_policy,fee_type,varchar,수수료 유형 코드,redshift
+fee_policy,fee_rate,numeric,수수료율 (%),redshift
+fee_policy,fixed_fee_amount,numeric,정액 수수료 금액 (원),redshift
+fee_policy,min_fee_amount,numeric,최소 수수료 금액 (원),redshift
+fee_policy,max_fee_amount,numeric,최대 수수료 금액 (원),redshift
+fee_policy,effective_from,date,적용 시작일,redshift
+fee_policy,effective_to,date,적용 종료일,redshift
+fee_policy,policy_status,varchar,정책 상태 코드,redshift
+fee_policy,payment_method,varchar,적용 결제 수단 코드,redshift
+fee_policy,created_at,timestamp,생성 일시,redshift
+tax_invoice,tax_invoice_id,varchar,세금계산서 식별자,redshift
+tax_invoice,merchant_id,varchar,가맹점 식별자,redshift
+tax_invoice,settlement_id,varchar,정산 식별자,redshift
+tax_invoice,issue_status,varchar,발행 상태 코드,redshift
+tax_invoice,issue_type,varchar,발행 유형 코드,redshift
+tax_invoice,issue_date,date,발행일,redshift
+tax_invoice,supply_amount,numeric,공급가액 (원),redshift
+tax_invoice,vat_amount,numeric,부가세액 (원),redshift
+tax_invoice,total_amount,numeric,합계 금액 (원),redshift
+tax_invoice,invoice_no,varchar,세금계산서 번호,redshift
+tax_invoice,correction_code,varchar,수정 발행 코드,redshift
+tax_invoice,created_at,timestamp,생성 일시,redshift
+settlement_adjustment,adjustment_id,varchar,조정 식별자,redshift
+settlement_adjustment,settlement_id,varchar,정산 식별자,redshift
+settlement_adjustment,merchant_id,varchar,가맹점 식별자,redshift
+settlement_adjustment,adjustment_type,varchar,조정 유형 코드,redshift
+settlement_adjustment,adjustment_reason_code,varchar,조정 사유 코드,redshift
+settlement_adjustment,adjustment_amount,numeric,조정 금액 (원),redshift
+settlement_adjustment,adjustment_status,varchar,조정 상태 코드,redshift
+settlement_adjustment,requested_at,timestamp,조정 요청 일시,redshift
+settlement_adjustment,approved_at,timestamp,조정 승인 일시,redshift
+settlement_adjustment,memo,varchar,조정 메모,redshift
+settlement_adjustment,created_at,timestamp,생성 일시,redshift
+settlement_hold,hold_id,varchar,보류 식별자,redshift
+settlement_hold,settlement_id,varchar,정산 식별자,redshift
+settlement_hold,merchant_id,varchar,가맹점 식별자,redshift
+settlement_hold,hold_reason_code,varchar,보류 사유 코드,redshift
+settlement_hold,hold_status,varchar,보류 상태 코드,redshift
+settlement_hold,hold_amount,numeric,보류 금액 (원),redshift
+settlement_hold,hold_start_date,date,보류 시작일,redshift
+settlement_hold,hold_release_date,date,보류 해제일,redshift
+settlement_hold,created_at,timestamp,생성 일시,redshift

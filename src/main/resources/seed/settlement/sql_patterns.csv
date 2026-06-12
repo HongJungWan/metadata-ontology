@@ -1,0 +1,35 @@
+triggerKeywords,columnTarget,operator,valueTemplate,priority
+미정산,settlement_status,EQ,PENDING,1
+정산완료,settlement_status,EQ,SETTLED,1
+수수료 높은,fee_amount,GTE,:feeThreshold,2
+지난달 정산,settlement_date,BETWEEN,:timeRange,2
+보류|홀드,settlement_status,EQ,HOLD,1
+지급실패|송금실패,payout_status,EQ,FAILED,1
+지급완료|송금완료,payout_status,EQ,COMPLETED,1
+지급예정,payout_status,EQ,SCHEDULED,1
+지급처리중|송금중,payout_status,EQ,PROCESSING,1
+휴면,merchant_status,EQ,DORMANT,1
+이용정지|정지,merchant_status,EQ,SUSPENDED,1
+운영중|영업중,merchant_status,EQ,ACTIVE,1
+발행완료,issue_status,EQ,ISSUED,1
+미발행,issue_status,EQ,NOT_ISSUED,1
+역발행,issue_type,EQ,REVERSE,1
+부분취소,transaction_status,EQ,PARTIAL_CANCELED,1
+환불완료,transaction_status,EQ,REFUNDED,1
+승인거래,transaction_status,EQ,APPROVED,1
+카드거래|카드결제건,payment_method,EQ,CARD,1
+간편결제거래,payment_method,EQ,EASY_PAY,1
+차지백|지불거절,adjustment_type,EQ,CHARGEBACK,1
+페널티|위약금,adjustment_type,EQ,PENALTY,1
+반품조정,adjustment_reason_code,EQ,RETURN,1
+부정거래|이상거래,hold_reason_code,EQ,FRAUD_SUSPECT,1
+보류중,hold_status,EQ,HOLDING,1
+원천징수대상,tax_withheld_yn,EQ,Y,1
+수수료 낮은,fee_amount,LTE,:feeThreshold,2
+고액정산|정산금액 큰,settlement_amount,GTE,:amountThreshold,2
+소액정산,settlement_amount,LTE,:amountThreshold,2
+고액거래,transaction_amount,GTE,:amountThreshold,2
+할부거래,installment_months,GTE,:installmentMin,2
+외화거래|해외거래,currency_code,IN,:currencyList,2
+최근 정산,settlement_date,BETWEEN,:timeRange,2
+이번달 지급,payout_scheduled_date,BETWEEN,:timeRange,2

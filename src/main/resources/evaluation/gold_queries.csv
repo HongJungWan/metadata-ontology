@@ -1,0 +1,61 @@
+queryId,query,expectedMappings,expectsTimeRange,note
+Q001,정산금액 가맹점,settlement.settlement_amount|merchant.merchant_id,false,표준 용어만 — baseline 도 성공
+Q002,수수료율,fee_policy.fee_rate,false,표준 용어만
+Q003,지급상태,payout.payout_status,false,표준 용어만
+Q004,거래금액 결제수단,payment_transaction.transaction_amount|payment_transaction.payment_method,false,표준 용어만
+Q005,가맹점명 사업자번호,merchant.merchant_name|merchant.business_no,false,표준 용어만
+Q006,발행상태 공급가액,tax_invoice.issue_status|tax_invoice.supply_amount,false,표준 용어만
+Q007,보류금액 보류사유,settlement_hold.hold_amount|settlement_hold.hold_reason_code,false,표준 용어만
+Q008,조정유형 조정금액,settlement_adjustment.adjustment_type|settlement_adjustment.adjustment_amount,false,표준 용어만
+Q009,차지백,settlement_adjustment.adjustment_type=CHARGEBACK,false,CODE 매핑 용어 — 규칙으로 코드 확정
+Q010,월정산 가맹점,settlement.settlement_cycle=MONTHLY|merchant.merchant_id,false,CODE 매핑 용어
+Q011,원천징수세액,settlement.withholding_tax_amount,false,표준 용어만
+Q012,정산예정일,settlement.scheduled_payout_date,false,표준 용어만
+Q013,카드결제 거래금액,payment_transaction.payment_method=CARD|payment_transaction.transaction_amount,false,CODE 매핑 용어
+Q014,은행코드 계좌번호,merchant.bank_code|payout.account_no,false,교차 테이블 다중 매핑
+Q015,수수료유형 정액수수료,fee_policy.fee_type|fee_policy.fixed_fee_amount,false,표준 용어만
+Q016,세틀 머천트,settlement.settlement_status|merchant.merchant_id,false,약어+한영 동의어 — 확장 필요
+Q017,미정산 머천트,settlement.settlement_status=PENDING|merchant.merchant_id,false,동의어+코드값 보강
+Q018,정산액 상점,settlement.settlement_amount|merchant.merchant_id,false,약어+구어 동의어
+Q019,fee 요율,settlement.fee_amount|fee_policy.fee_rate,false,한영+약어 동의어
+Q020,매출 환불액,settlement.sales_amount|settlement.refund_amount,false,약어 동의어
+Q021,원천세,settlement.withholding_tax_amount,false,약어 동의어
+Q022,머천트상태,merchant.merchant_status,false,구어 동의어
+Q023,상호명 대표자,merchant.merchant_name|merchant.representative_name,false,구어+약어 동의어
+Q024,지급액 송금상태,payout.payout_amount|payout.payout_status,false,약어+구어 동의어
+Q025,트랜잭션번호 승인시각,payment_transaction.transaction_id|payment_transaction.approved_at,false,한영+구어 동의어
+Q026,결제방법 할부,payment_transaction.payment_method|payment_transaction.installment_months,false,구어+약어 동의어
+Q027,부가세 합계액,tax_invoice.vat_amount|tax_invoice.total_amount,false,약어 동의어
+Q028,계산서번호 발급일,tax_invoice.invoice_no|tax_invoice.issue_date,false,약어+구어 동의어
+Q029,챠지백,settlement_adjustment.adjustment_type=CHARGEBACK,false,오타 동의어 → CODE 매핑
+Q030,홀드금액 홀드사유,settlement_hold.hold_amount|settlement_hold.hold_reason_code,false,구어 동의어
+Q031,정산ID,settlement.settlement_id,false,한영 동의어
+Q032,가멩점 정산금엑,merchant.merchant_id|settlement.settlement_amount,false,오타 동의어 2건
+Q033,커미션 정산대금,settlement.fee_amount|settlement.settlement_amount,false,한영+구어 동의어
+Q034,뱅크코드 예금주명,merchant.bank_code|merchant.account_holder,false,한영+구어 동의어
+Q035,이체,payment_transaction.payment_method=BANK_TRANSFER,false,약어 동의어 → CODE 매핑
+Q036,무통장입금,payment_transaction.payment_method=VIRTUAL_ACCOUNT,false,구어 동의어 → CODE 매핑
+Q037,폰결제,payment_transaction.payment_method=MOBILE,false,약어 동의어 → CODE 매핑
+Q038,monthly 셀러,settlement.settlement_cycle=MONTHLY|merchant.merchant_id,false,한영 동의어 — 확장 필요
+Q039,위수탁,merchant.contract_type=CONSIGNMENT,false,약어 동의어 → CODE 매핑
+Q040,면세사업자,merchant.tax_type=TAX_FREE,false,구어 동의어 → CODE 매핑
+Q041,미정산,settlement.settlement_status=PENDING,false,코드값 표면형 단독
+Q042,송금중,payout.payout_status=PROCESSING,false,코드값 표면형 — 동의어 경유 보강
+Q043,송금실패 지급액,payout.payout_status=FAILED|payout.payout_amount,false,코드값+약어 동의어
+Q044,발행전 계산서번호,tax_invoice.issue_status=NOT_ISSUED|tax_invoice.invoice_no,false,코드값+약어 동의어
+Q045,승인완료 거래액,payment_transaction.transaction_status=APPROVED|payment_transaction.transaction_amount,false,코드값+약어 동의어
+Q046,휴면상태 상호,merchant.merchant_status=DORMANT|merchant.merchant_name,false,코드값+구어 동의어
+Q047,간이 사업자등록번호,merchant.tax_type=SIMPLIFIED|merchant.business_no,false,코드값+구어 동의어
+Q048,정산완료 머천트,settlement.settlement_status=SETTLED|merchant.merchant_id,false,코드값 표면형+구어 동의어
+Q049,캔슬 정산액,settlement.settlement_status=CANCELED|settlement.settlement_amount,false,코드값 표면형+약어 동의어
+Q050,위클리,settlement.settlement_cycle=WEEKLY,false,코드값 표면형 → CODE 매핑
+Q051,지난달 미정산 머천트,settlement.settlement_status=PENDING|merchant.merchant_id,true,기간+동의어+코드값 복합
+Q052,이번달 지급예정일,payout.payout_scheduled_date|settlement.scheduled_payout_date,true,기간+다중 매핑
+Q053,어제 승인일시,payment_transaction.approved_at,true,기간+표준 용어
+Q054,올해 매출,settlement.sales_amount,true,기간+약어 동의어
+Q055,작년 정산금액,settlement.settlement_amount,true,기간+표준 용어
+Q056,최근 7일 거래금액,payment_transaction.transaction_amount,true,가변 기간 표현
+Q057,지난주 지급완료일시,payout.completed_at,true,기간+표준 용어
+Q058,이번주 보류해제일,settlement_hold.hold_release_date,true,기간+표준 용어
+Q059,오늘 송금상태,payout.payout_status,true,기간+구어 동의어
+Q060,지난달 정산일 머천트,settlement.settlement_date|merchant.merchant_id,true,기간+구어 동의어 복합

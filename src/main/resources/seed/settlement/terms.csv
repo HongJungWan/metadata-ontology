@@ -1,0 +1,185 @@
+canonicalName,domain,definition
+정산금액,settlement,가맹점에 지급될 정산 금액
+정산상태,settlement,정산 처리 상태 (미정산/정산완료 등)
+수수료,settlement,정산 시 차감되는 수수료 금액
+지급일,settlement,정산 금액이 가맹점에 지급되는 날짜
+가맹점,settlement,정산 대상 가맹점(머천트)
+정산주기,settlement,정산이 이루어지는 주기 (일/주/월 등)
+정산번호,settlement,정산 건을 식별하는 번호
+정산기준일,settlement,정산 집계의 기준이 되는 날짜
+정산예정일,settlement,정산 지급이 예정된 날짜
+정산확정일시,settlement,정산이 확정된 일시
+매출액,settlement,정산 대상 기간의 매출 합계
+환불금액,settlement,환불로 차감되는 금액
+조정금액,settlement,조정(차감·가산)으로 반영된 금액
+수수료부가세,settlement,수수료에 부과되는 부가가치세
+원천징수세액,settlement,지급 시 원천징수되는 세액
+통화코드,settlement,금액의 통화 단위 코드
+PG사,settlement,결제를 중개한 결제대행(PG)사
+생성일시,settlement,레코드가 생성된 일시
+차감금액,settlement,정산에서 차감되는 금액
+이월금액,settlement,다음 정산 회차로 이월되는 금액
+정산회차,settlement,정산이 수행된 회차
+프로모션지원금,settlement,프로모션 비용 중 회사 지원 분담금
+쿠폰할인금액,settlement,쿠폰 할인에 대한 분담금
+포인트사용금액,settlement,포인트 사용에 대한 분담금
+가맹점명,settlement,가맹점의 상호 명칭
+사업자번호,settlement,가맹점의 사업자등록번호
+대표자명,settlement,가맹점 대표자 이름
+가맹점상태,settlement,가맹점의 운영 상태 (운영중/휴면/해지 등)
+계약유형,settlement,가맹점과의 계약 형태 (위수탁/직매입 등)
+입점일,settlement,가맹점이 입점한 날짜
+해지일,settlement,가맹점 계약이 해지된 날짜
+은행코드,settlement,지급 계좌의 은행 코드
+계좌번호,settlement,정산 대금이 입금되는 계좌번호
+예금주,settlement,지급 계좌의 예금주 이름
+담당자이메일,settlement,가맹점 정산 담당자의 이메일
+담당자연락처,settlement,가맹점 정산 담당자의 연락처
+수정일시,settlement,레코드가 마지막으로 수정된 일시
+가맹점등급,settlement,가맹점의 등급 (프리미엄/일반 등)
+업종코드,settlement,가맹점의 업종 분류 코드
+브랜드명,settlement,가맹점이 취급하는 브랜드 명칭
+협력사코드,settlement,협력사(벤더)를 식별하는 코드
+과세유형,settlement,가맹점의 과세 구분 (과세/면세/간이)
+지급번호,settlement,지급 건을 식별하는 번호
+지급상태,settlement,지급 처리 상태 (예정/완료/실패 등)
+지급금액,settlement,가맹점에 실제 지급되는 금액
+지급예정일,settlement,지급이 예정된 날짜
+지급실패사유,settlement,지급 실패 시의 사유 코드
+재시도횟수,settlement,지급 재시도가 수행된 횟수
+지급완료일시,settlement,지급이 완료된 일시
+지급수단,settlement,지급에 사용된 수단 (계좌이체 등)
+원천징수여부,settlement,지급 건의 원천징수 적용 여부
+거래번호,settlement,결제 거래를 식별하는 번호
+결제수단,settlement,거래의 결제 수단 (카드/이체/간편결제 등)
+거래상태,settlement,결제 거래의 처리 상태
+거래금액,settlement,결제 거래의 금액
+승인번호,settlement,카드사 승인 번호
+승인일시,settlement,결제가 승인된 일시
+취소일시,settlement,결제가 취소된 일시
+카드사,settlement,결제에 사용된 카드 발급사
+할부개월,settlement,카드 할부 개월 수
+주문번호,settlement,거래와 연결된 주문 번호
+에스크로여부,settlement,에스크로 적용 여부
+부분취소여부,settlement,부분취소 발생 여부
+PG수수료,settlement,PG사가 부과하는 수수료 금액
+외화결제금액,settlement,해외 결제 시 외화 기준 금액
+수수료정책번호,settlement,수수료 정책을 식별하는 번호
+수수료유형,settlement,수수료 부과 방식 (정률/정액 등)
+수수료율,settlement,거래 금액 대비 수수료 비율
+정액수수료,settlement,건당 고정으로 부과되는 수수료 금액
+최소수수료,settlement,건당 부과되는 수수료의 하한 금액
+최대수수료,settlement,건당 부과되는 수수료의 상한 금액
+적용시작일,settlement,정책 적용이 시작되는 날짜
+적용종료일,settlement,정책 적용이 종료되는 날짜
+정책상태,settlement,수수료 정책의 상태 (적용중/만료 등)
+세금계산서번호,settlement,발행된 세금계산서의 번호
+발행상태,settlement,세금계산서 발행 상태
+발행유형,settlement,세금계산서 발행 유형 (정발행/역발행)
+발행일,settlement,세금계산서가 발행된 날짜
+공급가액,settlement,세금계산서의 공급가액
+부가세액,settlement,세금계산서의 부가가치세액
+합계금액,settlement,공급가액과 부가세를 합한 금액
+수정발행코드,settlement,수정 세금계산서의 발행 사유 코드
+조정번호,settlement,정산 조정 건을 식별하는 번호
+조정유형,settlement,조정의 유형 (차지백/페널티 등)
+조정사유,settlement,조정이 발생한 사유 코드
+조정상태,settlement,조정 건의 처리 상태
+조정요청일시,settlement,조정이 요청된 일시
+조정승인일시,settlement,조정이 승인된 일시
+조정메모,settlement,조정 건에 대한 비고
+보류번호,settlement,정산 보류 건을 식별하는 번호
+보류사유,settlement,정산이 보류된 사유 코드
+보류상태,settlement,보류 건의 상태 (보류중/해제)
+보류금액,settlement,보류로 지급이 묶인 금액
+보류시작일,settlement,보류가 시작된 날짜
+보류해제일,settlement,보류가 해제된 날짜
+정산수수료,settlement,정산 과정에서 차감되는 수수료
+실지급액,settlement,차감 후 가맹점에 실제 송금된 금액
+입금일,settlement,가맹점 계좌에 대금이 입금된 날짜
+입금예정일,settlement,가맹점 계좌 입금이 예정된 날짜
+정산일,settlement,정산이 수행된 기준 날짜
+결제일시,settlement,구매자의 결제가 이루어진 일시
+판매금액,settlement,판매 관점에서 본 거래 금액
+결제금액,settlement,구매자가 결제한 금액
+취소금액,settlement,취소·환불로 반환된 금액
+차지백,settlement,카드 소지자 이의제기로 발생한 조정 유형
+역발행,settlement,공급받는 자가 발행하는 세금계산서 유형
+정발행,settlement,공급자가 직접 발행하는 세금계산서 유형
+월정산,settlement,월 단위로 수행되는 정산 주기
+주정산,settlement,주 단위로 수행되는 정산 주기
+일정산,settlement,일 단위로 수행되는 정산 주기
+카드결제,settlement,신용·체크카드를 사용한 결제 수단
+계좌이체,settlement,은행 계좌 이체를 사용한 결제 수단
+간편결제,settlement,간편결제 서비스를 사용한 결제 수단
+가상계좌,settlement,가상계좌 입금을 사용한 결제 수단
+휴대폰결제,settlement,휴대폰 소액결제를 사용한 결제 수단
+정률제,settlement,거래 금액에 비례해 수수료를 부과하는 방식
+정액제,settlement,건당 고정 수수료를 부과하는 방식
+과세가맹점,settlement,과세 사업자로 등록된 가맹점 구분
+면세가맹점,settlement,면세 사업자로 등록된 가맹점 구분
+휴면가맹점,settlement,거래가 중단되어 휴면 상태인 가맹점 구분
+해지가맹점,settlement,계약이 해지된 가맹점 구분
+위수탁계약,settlement,판매 위탁·수탁 형태의 계약 유형
+직매입계약,settlement,상품을 직접 매입하는 계약 유형
+특약매입계약,settlement,반품 조건부 매입 특약 계약 유형
+정산,settlement,거래 대금에서 수수료·차감액을 반영해 가맹점 지급액을 확정하는 프로세스
+지급,settlement,확정된 정산 금액을 가맹점 계좌로 송금하는 프로세스
+거래,settlement,구매자와 가맹점 간의 결제 행위
+결제,settlement,구매자가 대금을 지불하는 행위
+환불,settlement,결제 대금을 구매자에게 반환하는 처리
+취소,settlement,결제 승인을 철회하는 처리
+조정,settlement,확정된 정산 금액을 사후에 가감하는 처리
+차감,settlement,정산 금액에서 일정 금액을 빼는 처리
+보류,settlement,정산 지급을 일시적으로 중지하는 처리
+정산마감,settlement,해당 회차의 정산 집계를 종료하는 절차
+정산집계,settlement,거래 내역을 모아 정산 금액을 계산하는 절차
+대사,settlement,거래·정산 데이터를 상호 대조해 일치 여부를 확인하는 작업
+정산검증,settlement,정산 결과의 정확성을 점검하는 절차
+재정산,settlement,오류 정정 등으로 정산을 다시 수행하는 처리
+선정산,settlement,지급 주기 도래 전에 미리 지급하는 정산 방식
+후정산,settlement,거래 확정 후 정해진 주기에 지급하는 정산 방식
+지급대행,settlement,제3의 기관이 가맹점 지급을 대신 수행하는 방식
+분리지급,settlement,한 정산 건을 여러 번에 나누어 지급하는 방식
+합산지급,settlement,여러 정산 건을 묶어 한 번에 지급하는 방식
+망취소,settlement,통신 장애 등으로 승인 직후 자동 취소되는 거래
+정산정책,settlement,정산 주기·기준을 정의하는 내부 정책
+수수료정책,settlement,수수료 부과 기준을 정의하는 정책
+지급정책,settlement,지급 시점·수단을 정의하는 정책
+원천징수,settlement,지급 시 세액을 미리 공제해 납부하는 제도
+부가가치세,settlement,재화·용역의 부가가치에 부과되는 세금
+소득세,settlement,소득에 대해 부과되는 세금
+지방소득세,settlement,소득세에 부가되는 지방세
+간이과세,settlement,일정 매출 미만 사업자에 적용되는 과세 특례
+일반과세,settlement,표준 세율이 적용되는 과세 유형
+면세,settlement,부가가치세가 면제되는 과세 유형
+에스크로,settlement,구매 확정 시까지 대금을 제3자가 보관하는 제도
+구매확정,settlement,구매자가 상품 수령을 확정하는 행위
+청약철회,settlement,구매자가 계약을 철회하는 행위
+페널티,settlement,정책 위반 등에 부과되는 제재성 차감
+프로모션분담금,settlement,프로모션 비용 중 가맹점이 부담하는 금액
+매입사,settlement,카드 매입 업무를 수행하는 기관
+밴사,settlement,카드 결제 승인을 중계하는 VAN 사업자
+협력사,settlement,상품 공급·운영을 함께하는 외부 회사
+구매자,settlement,상품을 구매하고 대금을 결제하는 고객
+정산담당자,settlement,가맹점 정산 업무를 담당하는 사람
+재무팀,settlement,자금·회계를 담당하는 내부 조직
+과세당국,settlement,세금 부과·징수를 담당하는 행정기관
+국세청,settlement,국세의 부과·징수를 담당하는 기관
+금융결제원,settlement,금융기관 간 지급 결제를 중계하는 기관
+지급대행사,settlement,가맹점 지급 송금을 대행하는 사업자
+정산서,settlement,정산 결과를 요약한 문서
+정산내역서,settlement,정산 건별 상세 내역을 담은 문서
+지급명세서,settlement,지급 건별 상세 내역을 담은 문서
+매출전표,settlement,개별 거래의 매출 증빙 전표
+거래명세서,settlement,거래 내역을 정리한 명세 문서
+정산리포트,settlement,정산 현황을 집계한 보고서
+대사리포트,settlement,대사 결과 불일치 내역을 담은 보고서
+증빙서류,settlement,정산·세무 처리의 근거가 되는 서류
+세금계산서합계표,settlement,발행 세금계산서를 집계한 신고용 표
+정산원장,settlement,정산 이력을 기록한 원장
+정산율,settlement,매출 대비 정산 금액의 비율
+미지급금,settlement,지급 의무가 확정되었으나 미지급된 금액
+미수금,settlement,받을 권리가 확정되었으나 미수령한 금액
+매출채권,settlement,매출로 발생한 받을 권리
+미정산잔액,settlement,아직 정산되지 않고 남아 있는 금액
