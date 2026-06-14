@@ -71,9 +71,11 @@ public class ResolveService {
                 ? expansionService.expand(normalized.residualQuery())
                 : new ExpansionResult(normalized.residualQuery(), List.of());
 
-        ResolvedTerms resolvedTerms = resolveTerms(expanded);
+        // 퍼지는 정확 파이프라인(동의어 확장 + 표준용어 조회) 이후 진짜 미매핑 토큰에만 적용한다 —
+        // 이미 유효한 표준용어가 유사 동의어로 치환돼 회귀하는 것을 막는다(오타/OOV 만 회복).
+        ResolvedTerms resolvedTerms = resolveTerms(expanded, options.expandFuzzy());
         List<ResolveResponse.ColumnMapping> columnMappings =
-                buildColumnMappings(resolvedTerms.termIds(), expanded.expansions());
+                buildColumnMappings(resolvedTerms.termIds(), resolvedTerms.allExpansions());
 
         return ResolveResponse.builder()
                 .normalizedQuery(buildNormalizedQuery(expanded.expandedQuery(), normalized.timeRange()))
@@ -84,7 +86,7 @@ public class ResolveService {
                 .build();
     }
 
-    private ResolvedTerms resolveTerms(ExpansionResult expanded) {
+    private ResolvedTerms resolveTerms(ExpansionResult expanded, boolean useFuzzy) {
         Map<String, String> surfaceByCanonical = new LinkedHashMap<>();
         for (ExpansionResult.TokenExpansion expansion : expanded.expansions()) {
             surfaceByCanonical.put(expansion.canonical(), expansion.surface());
@@ -93,27 +95,46 @@ public class ResolveService {
         List<ResolveResponse.ResolvedTerm> terms = new ArrayList<>();
         List<UUID> termIds = new ArrayList<>();
         List<String> unmapped = new ArrayList<>();
+        List<ExpansionResult.TokenExpansion> fuzzyExpansions = new ArrayList<>();
         Set<String> seen = new LinkedHashSet<>();
 
         for (String token : expanded.expandedQuery().trim().split("\\s+")) {
-            classifyToken(token, surfaceByCanonical, seen, terms, termIds, unmapped);
+            classifyToken(token, surfaceByCanonical, seen, terms, termIds, unmapped, useFuzzy, fuzzyExpansions);
         }
-        return new ResolvedTerms(terms, termIds, unmapped);
+
+        // 정확 확장 + 퍼지 회복 치환을 합쳐 코드값 해석(resolveCodeValues)에 함께 넘긴다.
+        List<ExpansionResult.TokenExpansion> allExpansions = new ArrayList<>(expanded.expansions());
+        allExpansions.addAll(fuzzyExpansions);
+        return new ResolvedTerms(terms, termIds, unmapped, allExpansions);
     }
 
     private void classifyToken(String token, Map<String, String> surfaceByCanonical, Set<String> seen,
                                List<ResolveResponse.ResolvedTerm> terms, List<UUID> termIds,
-                               List<String> unmapped) {
+                               List<String> unmapped, boolean useFuzzy,
+                               List<ExpansionResult.TokenExpansion> fuzzyExpansions) {
         if (token.isBlank() || !seen.add(token)) {
             return;
         }
         Optional<Term> term = termRepository.findByCanonicalName(token);
-        if (term.isEmpty()) {
-            unmapped.add(token);
+        if (term.isPresent()) {
+            terms.add(new ResolveResponse.ResolvedTerm(token, surfaceByCanonical.get(token)));
+            termIds.add(term.get().getTermId());
             return;
         }
-        terms.add(new ResolveResponse.ResolvedTerm(token, surfaceByCanonical.get(token)));
-        termIds.add(term.get().getTermId());
+        // 정확 미스 → 퍼지 폴백(오타/OOV). 퍼지 표준용어가 실제 Term 으로 해석될 때만 채택.
+        if (useFuzzy) {
+            Optional<String> fuzzyCanonical = expansionService.fuzzyCanonical(token);
+            if (fuzzyCanonical.isPresent()) {
+                Optional<Term> fuzzyTerm = termRepository.findByCanonicalName(fuzzyCanonical.get());
+                if (fuzzyTerm.isPresent()) {
+                    terms.add(new ResolveResponse.ResolvedTerm(fuzzyCanonical.get(), token));
+                    termIds.add(fuzzyTerm.get().getTermId());
+                    fuzzyExpansions.add(new ExpansionResult.TokenExpansion(token, fuzzyCanonical.get()));
+                    return;
+                }
+            }
+        }
+        unmapped.add(token);
     }
 
     private List<ResolveResponse.ColumnMapping> buildColumnMappings(
@@ -189,6 +210,7 @@ public class ResolveService {
 
     /** resolve 내부 집계 결과 */
     private record ResolvedTerms(List<ResolveResponse.ResolvedTerm> terms, List<UUID> termIds,
-                                 List<String> unmapped) {
+                                 List<String> unmapped,
+                                 List<ExpansionResult.TokenExpansion> allExpansions) {
     }
 }

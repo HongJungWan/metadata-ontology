@@ -1,0 +1,6 @@
+queryId,query,expectedMappings,expectsTimeRange,note
+F001,머천튼,merchant.merchant_id,false,오타(머천트) — 정확 미스 → 퍼지 회복
+F002,트랜잭션버호,payment_transaction.transaction_id,false,오타(트랜잭션번호) → 퍼지 회복
+F003,커미숀,settlement.fee_amount,false,오타(커미션) → 퍼지 회복
+F004,송금상테,payout.payout_status,false,오타(송금상태) → 퍼지 회복
+F005,예금주멍,merchant.account_holder,false,오타(예금주명) → 퍼지 회복

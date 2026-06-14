@@ -44,6 +44,12 @@ spring:
           batch_size: 25
         default_batch_fetch_size: 16
 
+  # --- FLYWAY ---
+  # 베이스/LOCAL(H2)에서는 끈다. Flyway 마이그레이션(db/migration, Postgres 문법)은 postgres 프로파일
+  # (application-postgres.yml)에서만 활성화한다. H2 는 create-drop + DataSeeder 가 스키마/시드를 관리.
+  flyway:
+    enabled: false
+
   # --- JACKSON/JSON ---
   jackson:
     serialization:
@@ -51,6 +57,13 @@ spring:
       fail-on-empty-beans: false
     default-property-inclusion: non_null
     time-zone: UTC
+
+# --- 동의어 확장 퍼지 폴백 ---
+# 정확 매칭 실패 토큰(오타·OOV)에 적용하는 트라이그램 유사도 임계값(pg_trgm 기본 0.3).
+# ExpansionService 에 DomainServiceConfig 가 주입(도메인은 설정에 직접 의존하지 않음).
+expansion:
+  fuzzy:
+    threshold: 0.3
 
 # --- 카탈로그 동기화 플래그 (기본 OFF — AWS 미연결) ---
 # true 로 켜도 CatalogSyncService.sync() 는 아직 미구현 (TODO(AWS)).

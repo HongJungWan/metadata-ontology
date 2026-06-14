@@ -1,0 +1,27 @@
+# ===================================================================
+# metadata-ontology 로컬 PostgreSQL (pg_trgm 퍼지 매칭)
+# 기동: docker compose -f docker/docker-compose.postgres.yml up -d
+# 앱 실행: ./gradlew bootRun --args='--spring.profiles.active=postgres'
+# pgvector/pgvector 이미지에는 pg_trgm(컨트리뷰션 모듈)이 기본 포함된다.
+# application-postgres.yml 기본 접속정보(metadb/meta/meta)와 일치한다.
+# ===================================================================
+services:
+  postgres:
+    image: pgvector/pgvector:pg16
+    container_name: metadata-ontology-postgres
+    environment:
+      POSTGRES_DB: metadb
+      POSTGRES_USER: meta
+      POSTGRES_PASSWORD: meta
+    ports:
+      - "5433:5432"
+    volumes:
+      - metadata-pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U meta -d metadb"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+volumes:
+  metadata-pgdata:

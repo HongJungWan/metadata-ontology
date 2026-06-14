@@ -19,16 +19,17 @@ import java.util.List;
  *   <li><b>mappedQueryRate</b> = 컬럼 매핑이 1건 이상 반환된 질의 비율 (PRD §7 매핑 커버리지)</li>
  * </ul>
  */
-@Schema(description = "재현율 평가 리포트 (BASELINE vs FULL)")
+@Schema(description = "재현율 평가 리포트 (BASELINE vs FULL vs FUZZY)")
 public record EvaluationReportResponse(
         @Schema(description = "평가 질의 수") int queryCount,
         @Schema(description = "동의어·정규화 미적용 결과") ArmResult baseline,
-        @Schema(description = "현행 resolve 결과") ArmResult full,
+        @Schema(description = "현행 resolve 결과(정확 동의어 확장)") ArmResult full,
+        @Schema(description = "FULL + 퍼지 폴백(오타·OOV 회복) 결과") ArmResult fuzzy,
         @Schema(description = "질의별 비교") List<QueryComparison> perQuery) {
 
     @Schema(description = "평가 대상(arm) 별 집계")
     public record ArmResult(
-            @Schema(description = "BASELINE 또는 FULL") String arm,
+            @Schema(description = "BASELINE/FULL/FUZZY") String arm,
             @Schema(description = "전체 기대 매핑 수") int goldTotal,
             @Schema(description = "매칭된 기대 매핑 수") int matchedGold,
             @Schema(description = "micro recall") double microRecall,

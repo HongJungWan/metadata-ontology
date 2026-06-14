@@ -1,0 +1,36 @@
+# ===================================================================
+# metadata-ontology — postgres 프로파일 (pg_trgm 퍼지 매칭, 운영 meta 스키마)
+# 실행: --spring.profiles.active=postgres
+# 스키마는 Flyway(db/migration)가 소유 — ddl-auto: none. DataSeeder 는 local 전용이라 미동작
+#   (운영 사전 적재는 CSV import/카탈로그 동기화 — 사용자 운영 절차).
+# 로컬 기동: docker compose -f docker/docker-compose.postgres.yml up -d (pgvector 이미지에 pg_trgm 내장)
+# ===================================================================
+
+spring:
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5433}/${DB_NAME:metadb}?currentSchema=meta
+    username: ${DB_USER:meta}
+    password: ${DB_PASS:meta}
+    hikari:
+      maximum-pool-size: 20
+
+  jpa:
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    hibernate:
+      ddl-auto: none           # Flyway 가 meta 스키마 소유(UUID/enum 의 validate 충돌 회피)
+    properties:
+      hibernate:
+        default_schema: meta
+
+  flyway:
+    enabled: true
+    schemas: meta
+    default-schema: meta
+    locations: classpath:db/migration
+
+  h2:
+    console:
+      enabled: false
+
+# 퍼지 임계값은 베이스(0.3) 상속.

@@ -2,10 +2,10 @@ package com.hris.metadata.domain.expand;
 
 import com.hris.metadata.domain.term.SynonymMatch;
 import com.hris.metadata.domain.term.SynonymRepository;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -23,8 +23,13 @@ class ExpansionServiceTest {
     @Mock
     private SynonymRepository synonymRepository;
 
-    @InjectMocks
     private ExpansionService expansionService;
+
+    @BeforeEach
+    void setUp() {
+        // 생성자에 퍼지 임계값(평소 DomainServiceConfig 가 주입)이 추가되어 수동 구성한다.
+        expansionService = new ExpansionService(synonymRepository, 0.3);
+    }
 
     @Test
     @DisplayName("동의어 토큰은 표준 용어로 치환되고, 사전에 없는 토큰은 그대로 유지된다")

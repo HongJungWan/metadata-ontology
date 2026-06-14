@@ -35,17 +35,29 @@ public class RecallEvaluationService {
     private final ResolveService resolveService;
 
     /**
-     * 정답셋 전체를 평가한다.
+     * 기본 정답셋({@code evaluation/gold_queries.csv})을 평가한다.
      *
      * @param referenceDate 기간 정규화 기준일 (호출자가 주입 — 결과 결정론 보장)
      */
     public EvaluationReportResponse evaluate(LocalDate referenceDate) {
-        List<GoldQuery> goldQueries = loadGoldQueries();
+        return evaluate(referenceDate, GOLD_QUERIES_RESOURCE);
+    }
+
+    /**
+     * 지정 정답셋 리소스를 평가한다 (BASELINE / FULL / FUZZY 3-arm).
+     * <p>
+     * FUZZY = FULL + 퍼지 폴백. 메인 셋에서는 정확 매칭이 이미 커버해 FUZZY≈FULL(무회귀)이고,
+     * 오타/OOV 셋({@code evaluation/gold_oov.csv})에서는 FUZZY 가 정확 미스를 회복해 FULL 을 능가한다.
+     */
+    public EvaluationReportResponse evaluate(LocalDate referenceDate, String goldResource) {
+        List<GoldQuery> goldQueries = loadGoldQueries(goldResource);
 
         Map<String, QueryOutcome> baselineOutcomes = evaluateArm(goldQueries, referenceDate,
                 ResolveOptions.rawBaseline());
         Map<String, QueryOutcome> fullOutcomes = evaluateArm(goldQueries, referenceDate,
                 ResolveOptions.full());
+        Map<String, QueryOutcome> fuzzyOutcomes = evaluateArm(goldQueries, referenceDate,
+                ResolveOptions.fullWithFuzzy());
 
         List<QueryComparison> comparisons = new ArrayList<>();
         for (GoldQuery gold : goldQueries) {
@@ -59,13 +71,14 @@ public class RecallEvaluationService {
                 goldQueries.size(),
                 aggregate("BASELINE", goldQueries, baselineOutcomes),
                 aggregate("FULL", goldQueries, fullOutcomes),
+                aggregate("FUZZY", goldQueries, fuzzyOutcomes),
                 comparisons);
     }
 
-    private List<GoldQuery> loadGoldQueries() {
-        InputStream in = getClass().getClassLoader().getResourceAsStream(GOLD_QUERIES_RESOURCE);
+    private List<GoldQuery> loadGoldQueries(String resource) {
+        InputStream in = getClass().getClassLoader().getResourceAsStream(resource);
         if (in == null) {
-            throw new IllegalStateException("정답셋 리소스를 찾을 수 없음: " + GOLD_QUERIES_RESOURCE);
+            throw new IllegalStateException("정답셋 리소스를 찾을 수 없음: " + resource);
         }
         return GoldQueryCsvParser.parse(in);
     }

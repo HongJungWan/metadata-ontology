@@ -5,6 +5,7 @@ import com.hris.metadata.domain.normalize.NormalizationService;
 import com.hris.metadata.domain.pattern.SqlPatternService;
 import com.hris.metadata.domain.pattern.SqlPatternRepository;
 import com.hris.metadata.domain.term.SynonymRepository;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -23,8 +24,10 @@ public class DomainServiceConfig {
     }
 
     @Bean
-    public ExpansionService expansionService(SynonymRepository synonymRepository) {
-        return new ExpansionService(synonymRepository);
+    public ExpansionService expansionService(
+            SynonymRepository synonymRepository,
+            @Value("${expansion.fuzzy.threshold:0.3}") double fuzzyThreshold) {
+        return new ExpansionService(synonymRepository, fuzzyThreshold);
     }
 
     @Bean
