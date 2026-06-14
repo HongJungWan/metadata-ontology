@@ -74,8 +74,13 @@ public class ResolveService {
         // 퍼지는 정확 파이프라인(동의어 확장 + 표준용어 조회) 이후 진짜 미매핑 토큰에만 적용한다 —
         // 이미 유효한 표준용어가 유사 동의어로 치환돼 회귀하는 것을 막는다(오타/OOV 만 회복).
         ResolvedTerms resolvedTerms = resolveTerms(expanded, options.expandFuzzy());
+        // 코드값 표면형을 잔여 질의의 모든 토큰에서 찾는다 — 용어로 잡힌 토큰("홀드"→보류 용어)이라도 그 코드값
+        // (settlement_status=HOLD)이 용어 매핑 컬럼과 무관하면 누락되던 문제를 해결(어휘 정렬, coverage↑).
+        // BASELINE(expand off)은 항등 유지를 위해 빈 목록(코드 해석 미적용).
+        List<String> codeSurfaceTokens = options.expandSynonyms()
+                ? tokenize(normalized.residualQuery()) : List.of();
         List<ResolveResponse.ColumnMapping> columnMappings =
-                buildColumnMappings(resolvedTerms.termIds(), resolvedTerms.allExpansions());
+                buildColumnMappings(resolvedTerms.termIds(), codeSurfaceTokens);
 
         return ResolveResponse.builder()
                 .normalizedQuery(buildNormalizedQuery(expanded.expandedQuery(), normalized.timeRange()))
@@ -95,23 +100,17 @@ public class ResolveService {
         List<ResolveResponse.ResolvedTerm> terms = new ArrayList<>();
         List<UUID> termIds = new ArrayList<>();
         List<String> unmapped = new ArrayList<>();
-        List<ExpansionResult.TokenExpansion> fuzzyExpansions = new ArrayList<>();
         Set<String> seen = new LinkedHashSet<>();
 
         for (String token : expanded.expandedQuery().trim().split("\\s+")) {
-            classifyToken(token, surfaceByCanonical, seen, terms, termIds, unmapped, useFuzzy, fuzzyExpansions);
+            classifyToken(token, surfaceByCanonical, seen, terms, termIds, unmapped, useFuzzy);
         }
-
-        // 정확 확장 + 퍼지 회복 치환을 합쳐 코드값 해석(resolveCodeValues)에 함께 넘긴다.
-        List<ExpansionResult.TokenExpansion> allExpansions = new ArrayList<>(expanded.expansions());
-        allExpansions.addAll(fuzzyExpansions);
-        return new ResolvedTerms(terms, termIds, unmapped, allExpansions);
+        return new ResolvedTerms(terms, termIds, unmapped);
     }
 
     private void classifyToken(String token, Map<String, String> surfaceByCanonical, Set<String> seen,
                                List<ResolveResponse.ResolvedTerm> terms, List<UUID> termIds,
-                               List<String> unmapped, boolean useFuzzy,
-                               List<ExpansionResult.TokenExpansion> fuzzyExpansions) {
+                               List<String> unmapped, boolean useFuzzy) {
         if (token.isBlank() || !seen.add(token)) {
             return;
         }
@@ -129,7 +128,6 @@ public class ResolveService {
                 if (fuzzyTerm.isPresent()) {
                     terms.add(new ResolveResponse.ResolvedTerm(fuzzyCanonical.get(), token));
                     termIds.add(fuzzyTerm.get().getTermId());
-                    fuzzyExpansions.add(new ExpansionResult.TokenExpansion(token, fuzzyCanonical.get()));
                     return;
                 }
             }
@@ -138,12 +136,18 @@ public class ResolveService {
     }
 
     private List<ResolveResponse.ColumnMapping> buildColumnMappings(
-            List<UUID> termIds, List<ExpansionResult.TokenExpansion> expansions) {
+            List<UUID> termIds, List<String> codeSurfaceTokens) {
         List<ColumnMapping> rows = schemaMappingRepository.findColumnMappingsByTermIds(termIds);
-        // 표면형이 코드값(예: "미정산"→PENDING)을 가리키면 컬럼.코드값으로 미리 풀어둔다 (PRD §4.1).
-        Map<String, String> codeByColumn = resolveCodeValues(expansions);
+        // 잔여 토큰에서 코드값 후보를 한 번에 찾는다(컬럼·코드 보존). 컬럼별 코드값으로도 인덱싱.
+        List<CodeValueCandidate> hits = resolveCodeCandidates(codeSurfaceTokens);
+        Map<String, String> codeByColumn = new LinkedHashMap<>();
+        for (CodeValueCandidate hit : hits) {
+            codeByColumn.putIfAbsent(columnKey(hit.physicalTable(), hit.physicalColumn()), hit.code());
+        }
 
         List<ResolveResponse.ColumnMapping> mappings = new ArrayList<>();
+        Set<String> emitted = new LinkedHashSet<>();
+        // (1) 용어로 매핑된 컬럼의 코드값을 표면형(예: "미정산"→PENDING)으로 채운다 (PRD §4.1).
         for (ColumnMapping row : rows) {
             String code = row.codeValueRule();
             if (code == null) {
@@ -151,30 +155,49 @@ public class ResolveService {
             }
             mappings.add(new ResolveResponse.ColumnMapping(
                     row.physicalTable(), row.physicalColumn(), code));
+            emitted.add(columnKey(row.physicalTable(), row.physicalColumn()));
+        }
+
+        // (2) 코드값 표면형(예: "홀드"→HOLD, "보류"/"대기")이 가리키는 컬럼이 용어 매핑에 없으면 직접 매핑으로 추가.
+        // KS 등 /resolve 소비자가 코드 필터를 얻어 정형 질의 정밀도를 확보하게 한다(어휘 정렬, coverage↑).
+        for (CodeValueCandidate hit : hits) {
+            String key = columnKey(hit.physicalTable(), hit.physicalColumn());
+            if (emitted.add(key)) {
+                mappings.add(new ResolveResponse.ColumnMapping(
+                        hit.physicalTable(), hit.physicalColumn(), hit.code()));
+            }
         }
         return mappings;
     }
 
-    /**
-     * 질의 표면형 중 코드값 사전(코드/라벨/동의어)에 정확히 일치하는 것을 찾아
-     * "테이블.컬럼" → 코드 맵으로 돌려준다. 예: "미정산" → settlement.settlement_status → PENDING.
-     * <p>
-     * 해석된 용어와 무관한 순수 코드값 토큰(예: 용어 동의어가 아닌 "보류")은 여기서 다루지 않고
-     * /match-sql-pattern 이 담당한다.
-     */
-    private Map<String, String> resolveCodeValues(List<ExpansionResult.TokenExpansion> expansions) {
-        Map<String, String> codeByColumn = new LinkedHashMap<>();
-        for (ExpansionResult.TokenExpansion expansion : expansions) {
-            String surface = expansion.surface();
+    /** 잔여 질의를 공백 토큰으로 나눈다(코드값 표면형 직매칭 대상). */
+    private List<String> tokenize(String query) {
+        List<String> tokens = new ArrayList<>();
+        if (query == null || query.isBlank()) {
+            return tokens;
+        }
+        for (String token : query.trim().split("\\s+")) {
+            if (!token.isBlank()) {
+                tokens.add(token);
+            }
+        }
+        return tokens;
+    }
+
+    /** 표면형 정확 일치하는 코드값 후보 목록(컬럼·코드 보존). */
+    private List<CodeValueCandidate> resolveCodeCandidates(List<String> surfaces) {
+        List<CodeValueCandidate> hits = new ArrayList<>();
+        for (String surface : surfaces) {
+            if (surface == null || surface.isBlank()) {
+                continue;
+            }
             for (CodeValueCandidate candidate : codeValueRepository.findCandidatesBySurface(surface)) {
                 if (matchesSurface(candidate, surface)) {
-                    codeByColumn.put(columnKey(
-                            candidate.physicalTable(),
-                            candidate.physicalColumn()), candidate.code());
+                    hits.add(candidate);
                 }
             }
         }
-        return codeByColumn;
+        return hits;
     }
 
     /** LIKE 1차 필터 결과를 코드/라벨/동의어 정확 일치로 재검증한다 (부분일치 오탐 방지). */
@@ -210,7 +233,6 @@ public class ResolveService {
 
     /** resolve 내부 집계 결과 */
     private record ResolvedTerms(List<ResolveResponse.ResolvedTerm> terms, List<UUID> termIds,
-                                 List<String> unmapped,
-                                 List<ExpansionResult.TokenExpansion> allExpansions) {
+                                 List<String> unmapped) {
     }
 }
