@@ -33,7 +33,7 @@ public class TermResponse {
 
     public static TermResponse from(Term term) {
         return TermResponse.builder()
-                .termId(term.getTermId())
+                .termId(term.getTermId().value())
                 .canonicalName(term.getCanonicalName().value())
                 .domain(term.getDomain() == null ? null : term.getDomain().value())
                 .definition(term.getDefinition() == null ? null : term.getDefinition().value())

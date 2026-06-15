@@ -32,8 +32,8 @@ public class CodeValueResponse {
 
     public static CodeValueResponse from(CodeValue codeValue) {
         return CodeValueResponse.builder()
-                .codeValueId(codeValue.getCodeValueId())
-                .schemaCatalogId(codeValue.getSchemaCatalogId())
+                .codeValueId(codeValue.getCodeValueId().value())
+                .schemaCatalogId(codeValue.getSchemaCatalogId().value())
                 .code(codeValue.getCode().value())
                 .label(codeValue.getLabel() == null ? null : codeValue.getLabel().value())
                 .synonyms(codeValue.getSynonyms() == null ? null : codeValue.getSynonyms().value())

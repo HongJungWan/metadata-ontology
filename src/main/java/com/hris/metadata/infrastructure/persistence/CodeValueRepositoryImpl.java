@@ -3,12 +3,13 @@ package com.hris.metadata.infrastructure.persistence;
 import com.hris.metadata.domain.schema.CodeValue;
 import com.hris.metadata.domain.schema.CodeValueCandidate;
 import com.hris.metadata.domain.schema.CodeValueRepository;
+import com.hris.metadata.domain.schema.vo.CodeValueId;
+import com.hris.metadata.domain.schema.vo.SchemaCatalogId;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 
 /**
  * CodeValueRepository 포트의 어댑터 (infrastructure).
@@ -28,12 +29,12 @@ public class CodeValueRepositoryImpl implements CodeValueRepository {
     }
 
     @Override
-    public Optional<CodeValue> findById(UUID codeValueId) {
+    public Optional<CodeValue> findById(CodeValueId codeValueId) {
         return jpa.findById(codeValueId);
     }
 
     @Override
-    public List<CodeValue> findAllBySchemaCatalogId(UUID schemaCatalogId) {
+    public List<CodeValue> findAllBySchemaCatalogId(SchemaCatalogId schemaCatalogId) {
         return jpa.findAllBySchemaCatalogId(schemaCatalogId);
     }
 

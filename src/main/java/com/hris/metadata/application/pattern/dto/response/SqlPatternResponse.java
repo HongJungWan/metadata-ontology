@@ -36,7 +36,7 @@ public class SqlPatternResponse {
 
     public static SqlPatternResponse from(SqlPattern pattern) {
         return SqlPatternResponse.builder()
-                .sqlPatternId(pattern.getSqlPatternId())
+                .sqlPatternId(pattern.getSqlPatternId().value())
                 .triggerKeywords(pattern.getTriggerKeywords().value())
                 .columnTarget(pattern.getColumnTarget().value())
                 .operator(pattern.getOperator())

@@ -1,6 +1,8 @@
 package com.hris.metadata.domain.term;
 
 import com.hris.metadata.domain.term.vo.Surface;
+import com.hris.metadata.domain.term.vo.SynonymId;
+import com.hris.metadata.domain.term.vo.TermId;
 import com.hris.metadata.global.common.BaseEntity;
 import com.hris.metadata.shared.ddd.AggregateRoot;
 import com.hris.metadata.shared.ddd.Subdomain;
@@ -8,10 +10,10 @@ import com.hris.metadata.shared.ddd.SubdomainType;
 import jakarta.persistence.AttributeOverride;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embedded;
+import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
-import jakarta.persistence.Id;
 import jakarta.persistence.Index;
 import jakarta.persistence.Table;
 import lombok.AccessLevel;
@@ -44,13 +46,14 @@ import java.util.UUID;
 public class Synonym extends BaseEntity {
 
     /** 동의어 ID (PK) */
-    @Id
-    @Column(name = "synonym_id", nullable = false, columnDefinition = "uuid")
-    private UUID synonymId;
+    @EmbeddedId
+    @AttributeOverride(name = "value", column = @Column(name = "synonym_id", nullable = false, columnDefinition = "uuid"))
+    private SynonymId synonymId;
 
     /** 표준 용어 ID (FK) */
-    @Column(name = "term_id", nullable = false, columnDefinition = "uuid")
-    private UUID termId;
+    @Embedded
+    @AttributeOverride(name = "value", column = @Column(name = "term_id", nullable = false, columnDefinition = "uuid"))
+    private TermId termId;
 
     /** 표면형 표현 (예: 세틀) */
     @Embedded
@@ -76,8 +79,8 @@ public class Synonym extends BaseEntity {
             throw new IllegalArgumentException("termId 는 필수입니다.");
         }
         return Synonym.builder()
-                .synonymId(synonymId)
-                .termId(termId)
+                .synonymId(new SynonymId(synonymId))
+                .termId(new TermId(termId))
                 .surface(new Surface(surface))
                 .type(type)
                 .build();

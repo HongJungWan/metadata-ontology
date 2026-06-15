@@ -2,19 +2,20 @@ package com.hris.metadata.infrastructure.persistence;
 
 import com.hris.metadata.domain.schema.CodeValue;
 import com.hris.metadata.domain.schema.CodeValueCandidate;
+import com.hris.metadata.domain.schema.vo.CodeValueId;
+import com.hris.metadata.domain.schema.vo.SchemaCatalogId;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
-import java.util.UUID;
 
 /**
  * CodeValue Spring Data JPA 어댑터 (infrastructure).
  */
-public interface CodeValueJpaRepository extends JpaRepository<CodeValue, UUID> {
+public interface CodeValueJpaRepository extends JpaRepository<CodeValue, CodeValueId> {
 
-    List<CodeValue> findAllBySchemaCatalogId(UUID schemaCatalogId);
+    List<CodeValue> findAllBySchemaCatalogId(SchemaCatalogId schemaCatalogId);
 
     /**
      * 표면형(코드/라벨/동의어)에 해당하는 코드값 후보를 물리 테이블·컬럼과 함께 한 번의 쿼리로 찾는다.

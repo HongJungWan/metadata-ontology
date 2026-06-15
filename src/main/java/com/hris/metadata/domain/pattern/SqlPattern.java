@@ -1,6 +1,7 @@
 package com.hris.metadata.domain.pattern;
 
 import com.hris.metadata.domain.pattern.vo.ColumnTarget;
+import com.hris.metadata.domain.pattern.vo.SqlPatternId;
 import com.hris.metadata.domain.pattern.vo.TriggerKeywords;
 import com.hris.metadata.domain.pattern.vo.ValueTemplate;
 import com.hris.metadata.global.common.BaseEntity;
@@ -10,10 +11,10 @@ import com.hris.metadata.shared.ddd.SubdomainType;
 import jakarta.persistence.AttributeOverride;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embedded;
+import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
-import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -44,9 +45,9 @@ import java.util.UUID;
 public class SqlPattern extends BaseEntity {
 
     /** SQL 패턴 ID (PK) */
-    @Id
-    @Column(name = "sql_pattern_id", nullable = false, columnDefinition = "uuid")
-    private UUID sqlPatternId;
+    @EmbeddedId
+    @AttributeOverride(name = "value", column = @Column(name = "sql_pattern_id", nullable = false, columnDefinition = "uuid"))
+    private SqlPatternId sqlPatternId;
 
     /** 트리거 키워드 (콤마 구분, 예: "미정산,세틀미완료") */
     @Embedded
@@ -87,7 +88,7 @@ public class SqlPattern extends BaseEntity {
             throw new IllegalArgumentException("operator 는 필수입니다.");
         }
         return SqlPattern.builder()
-                .sqlPatternId(sqlPatternId)
+                .sqlPatternId(new SqlPatternId(sqlPatternId))
                 .triggerKeywords(new TriggerKeywords(triggerKeywords))
                 .columnTarget(new ColumnTarget(columnTarget))
                 .operator(operator)

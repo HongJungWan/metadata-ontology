@@ -3,13 +3,13 @@ package com.hris.metadata.infrastructure.persistence;
 import com.hris.metadata.domain.pattern.QSqlPattern;
 import com.hris.metadata.domain.pattern.SqlPattern;
 import com.hris.metadata.domain.pattern.SqlPatternRepository;
+import com.hris.metadata.domain.pattern.vo.SqlPatternId;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 
 /**
  * SqlPatternRepository 포트의 어댑터 (infrastructure).
@@ -39,7 +39,7 @@ public class SqlPatternRepositoryImpl implements SqlPatternRepository {
     }
 
     @Override
-    public Optional<SqlPattern> findById(UUID sqlPatternId) {
+    public Optional<SqlPattern> findById(SqlPatternId sqlPatternId) {
         return jpa.findById(sqlPatternId);
     }
 

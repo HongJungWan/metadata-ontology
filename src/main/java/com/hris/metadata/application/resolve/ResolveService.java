@@ -11,6 +11,7 @@ import com.hris.metadata.domain.schema.CodeValueCandidate;
 import com.hris.metadata.domain.schema.CodeValueRepository;
 import com.hris.metadata.domain.term.Term;
 import com.hris.metadata.domain.term.TermRepository;
+import com.hris.metadata.domain.term.vo.TermId;
 import com.hris.metadata.application.resolve.dto.response.ResolveResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -24,7 +25,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import java.util.UUID;
 
 /**
  * /resolve 오케스트레이션 서비스 (응용 서비스).
@@ -98,7 +98,7 @@ public class ResolveService {
         }
 
         List<ResolveResponse.ResolvedTerm> terms = new ArrayList<>();
-        List<UUID> termIds = new ArrayList<>();
+        List<TermId> termIds = new ArrayList<>();
         List<String> unmapped = new ArrayList<>();
         Set<String> seen = new LinkedHashSet<>();
 
@@ -109,7 +109,7 @@ public class ResolveService {
     }
 
     private void classifyToken(String token, Map<String, String> surfaceByCanonical, Set<String> seen,
-                               List<ResolveResponse.ResolvedTerm> terms, List<UUID> termIds,
+                               List<ResolveResponse.ResolvedTerm> terms, List<TermId> termIds,
                                List<String> unmapped, boolean useFuzzy) {
         if (token.isBlank() || !seen.add(token)) {
             return;
@@ -136,7 +136,7 @@ public class ResolveService {
     }
 
     private List<ResolveResponse.ColumnMapping> buildColumnMappings(
-            List<UUID> termIds, List<String> codeSurfaceTokens) {
+            List<TermId> termIds, List<String> codeSurfaceTokens) {
         List<ColumnMapping> rows = schemaMappingRepository.findColumnMappingsByTermIds(termIds);
         // 잔여 토큰에서 코드값 후보를 한 번에 찾는다(컬럼·코드 보존). 컬럼별 코드값으로도 인덱싱.
         List<CodeValueCandidate> hits = resolveCodeCandidates(codeSurfaceTokens);
@@ -232,7 +232,7 @@ public class ResolveService {
     }
 
     /** resolve 내부 집계 결과 */
-    private record ResolvedTerms(List<ResolveResponse.ResolvedTerm> terms, List<UUID> termIds,
+    private record ResolvedTerms(List<ResolveResponse.ResolvedTerm> terms, List<TermId> termIds,
                                  List<String> unmapped) {
     }
 }

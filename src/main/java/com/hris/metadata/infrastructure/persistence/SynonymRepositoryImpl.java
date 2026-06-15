@@ -5,6 +5,8 @@ import com.hris.metadata.domain.term.QTerm;
 import com.hris.metadata.domain.term.Synonym;
 import com.hris.metadata.domain.term.SynonymMatch;
 import com.hris.metadata.domain.term.SynonymRepository;
+import com.hris.metadata.domain.term.vo.SynonymId;
+import com.hris.metadata.domain.term.vo.TermId;
 import com.querydsl.core.Tuple;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
@@ -15,7 +17,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-import java.util.UUID;
 
 /**
  * SynonymRepository 포트의 어댑터 (infrastructure) — H2/기본 프로파일(postgres 제외).
@@ -44,12 +45,12 @@ public class SynonymRepositoryImpl implements SynonymRepository {
     }
 
     @Override
-    public Optional<Synonym> findById(UUID synonymId) {
+    public Optional<Synonym> findById(SynonymId synonymId) {
         return jpa.findById(synonymId);
     }
 
     @Override
-    public List<Synonym> findAllByTermId(UUID termId) {
+    public List<Synonym> findAllByTermId(TermId termId) {
         return jpa.findAllByTermId(termId);
     }
 

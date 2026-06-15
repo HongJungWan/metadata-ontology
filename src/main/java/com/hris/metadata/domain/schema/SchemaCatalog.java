@@ -4,6 +4,7 @@ import com.hris.metadata.domain.schema.vo.DataType;
 import com.hris.metadata.domain.schema.vo.Description;
 import com.hris.metadata.domain.schema.vo.PhysicalColumn;
 import com.hris.metadata.domain.schema.vo.PhysicalTable;
+import com.hris.metadata.domain.schema.vo.SchemaCatalogId;
 import com.hris.metadata.domain.schema.vo.SourceSystem;
 import com.hris.metadata.global.common.BaseEntity;
 import com.hris.metadata.shared.ddd.AggregateRoot;
@@ -12,8 +13,8 @@ import com.hris.metadata.shared.ddd.SubdomainType;
 import jakarta.persistence.AttributeOverride;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embedded;
+import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
 import jakarta.persistence.Index;
 import jakarta.persistence.Table;
 import lombok.AccessLevel;
@@ -45,9 +46,9 @@ import java.util.UUID;
 public class SchemaCatalog extends BaseEntity {
 
     /** 스키마 카탈로그 ID (PK) */
-    @Id
-    @Column(name = "schema_catalog_id", nullable = false, columnDefinition = "uuid")
-    private UUID schemaCatalogId;
+    @EmbeddedId
+    @AttributeOverride(name = "value", column = @Column(name = "schema_catalog_id", nullable = false, columnDefinition = "uuid"))
+    private SchemaCatalogId schemaCatalogId;
 
     /** 물리 테이블명 (예: settlement) */
     @Embedded
@@ -86,7 +87,7 @@ public class SchemaCatalog extends BaseEntity {
             throw new IllegalArgumentException("schemaCatalogId 는 필수입니다.");
         }
         return SchemaCatalog.builder()
-                .schemaCatalogId(schemaCatalogId)
+                .schemaCatalogId(new SchemaCatalogId(schemaCatalogId))
                 .physicalTable(new PhysicalTable(physicalTable))
                 .physicalColumn(new PhysicalColumn(physicalColumn))
                 .dataType(dataType == null ? null : new DataType(dataType))

@@ -8,6 +8,10 @@ import com.hris.metadata.domain.term.SynonymRepository;
 import com.hris.metadata.domain.term.Term;
 import com.hris.metadata.domain.term.TermRepository;
 import com.hris.metadata.domain.term.TermStatus;
+import com.hris.metadata.domain.term.vo.SynonymId;
+import com.hris.metadata.domain.term.vo.TermId;
+import com.hris.metadata.domain.schema.vo.SchemaCatalogId;
+import com.hris.metadata.domain.mapping.vo.SchemaMappingId;
 import com.hris.metadata.global.exception.BusinessException;
 import com.hris.metadata.global.exception.ErrorCode;
 import com.hris.metadata.application.term.command.AddSynonymCommand;
@@ -92,12 +96,12 @@ public class TermAdminService {
     }
 
     public List<SynonymResponse> getSynonyms(UUID termId) {
-        return synonymRepository.findAllByTermId(termId).stream().map(SynonymResponse::from).toList();
+        return synonymRepository.findAllByTermId(new TermId(termId)).stream().map(SynonymResponse::from).toList();
     }
 
     @Transactional
     public void deleteSynonym(UUID synonymId) {
-        Synonym synonym = synonymRepository.findById(synonymId)
+        Synonym synonym = synonymRepository.findById(new SynonymId(synonymId))
                 .orElseThrow(() -> new BusinessException(ErrorCode.SYNONYM_NOT_FOUND));
         synonym.softDelete();
     }
@@ -107,10 +111,10 @@ public class TermAdminService {
     @Transactional
     public SchemaMappingResponse createMapping(MapTermToColumnCommand command) {
         getTermOrThrow(command.termId());
-        schemaCatalogRepository.findById(command.schemaCatalogId())
+        schemaCatalogRepository.findById(new SchemaCatalogId(command.schemaCatalogId()))
                 .orElseThrow(() -> new BusinessException(ErrorCode.SCHEMA_CATALOG_NOT_FOUND));
         if (schemaMappingRepository.existsByTermIdAndSchemaCatalogId(
-                command.termId(), command.schemaCatalogId())) {
+                new TermId(command.termId()), new SchemaCatalogId(command.schemaCatalogId()))) {
             throw new BusinessException(ErrorCode.DUPLICATE_MAPPING);
         }
         SchemaMapping mapping = SchemaMapping.create(
@@ -124,19 +128,19 @@ public class TermAdminService {
     }
 
     public List<SchemaMappingResponse> getMappingsByTerm(UUID termId) {
-        return schemaMappingRepository.findAllByTermId(termId).stream()
+        return schemaMappingRepository.findAllByTermId(new TermId(termId)).stream()
                 .map(SchemaMappingResponse::from).toList();
     }
 
     @Transactional
     public void deleteMapping(UUID schemaMappingId) {
-        SchemaMapping mapping = schemaMappingRepository.findById(schemaMappingId)
+        SchemaMapping mapping = schemaMappingRepository.findById(new SchemaMappingId(schemaMappingId))
                 .orElseThrow(() -> new BusinessException(ErrorCode.MAPPING_NOT_FOUND));
         mapping.softDelete();
     }
 
     private Term getTermOrThrow(UUID termId) {
-        return termRepository.findById(termId)
+        return termRepository.findById(new TermId(termId))
                 .orElseThrow(() -> new BusinessException(ErrorCode.TERM_NOT_FOUND));
     }
 }

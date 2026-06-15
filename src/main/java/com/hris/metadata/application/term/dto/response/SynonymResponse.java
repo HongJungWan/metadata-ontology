@@ -30,8 +30,8 @@ public class SynonymResponse {
 
     public static SynonymResponse from(Synonym synonym) {
         return SynonymResponse.builder()
-                .synonymId(synonym.getSynonymId())
-                .termId(synonym.getTermId())
+                .synonymId(synonym.getSynonymId().value())
+                .termId(synonym.getTermId().value())
                 .surface(synonym.getSurface().value())
                 .type(synonym.getType())
                 .build();

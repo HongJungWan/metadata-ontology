@@ -1,8 +1,10 @@
 package com.hris.metadata.domain.schema;
 
 import com.hris.metadata.domain.schema.vo.Code;
+import com.hris.metadata.domain.schema.vo.CodeValueId;
 import com.hris.metadata.domain.schema.vo.CodeValueSynonyms;
 import com.hris.metadata.domain.schema.vo.Label;
+import com.hris.metadata.domain.schema.vo.SchemaCatalogId;
 import com.hris.metadata.global.common.BaseEntity;
 import com.hris.metadata.shared.ddd.AggregateRoot;
 import com.hris.metadata.shared.ddd.Subdomain;
@@ -10,8 +12,8 @@ import com.hris.metadata.shared.ddd.SubdomainType;
 import jakarta.persistence.AttributeOverride;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embedded;
+import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
 import jakarta.persistence.Index;
 import jakarta.persistence.Table;
 import lombok.AccessLevel;
@@ -44,13 +46,14 @@ import java.util.UUID;
 public class CodeValue extends BaseEntity {
 
     /** 코드값 ID (PK) */
-    @Id
-    @Column(name = "code_value_id", nullable = false, columnDefinition = "uuid")
-    private UUID codeValueId;
+    @EmbeddedId
+    @AttributeOverride(name = "value", column = @Column(name = "code_value_id", nullable = false, columnDefinition = "uuid"))
+    private CodeValueId codeValueId;
 
     /** 스키마 카탈로그 ID (FK) */
-    @Column(name = "schema_catalog_id", nullable = false, columnDefinition = "uuid")
-    private UUID schemaCatalogId;
+    @Embedded
+    @AttributeOverride(name = "value", column = @Column(name = "schema_catalog_id", nullable = false, columnDefinition = "uuid"))
+    private SchemaCatalogId schemaCatalogId;
 
     /** 코드 (예: PENDING) */
     @Embedded
@@ -82,8 +85,8 @@ public class CodeValue extends BaseEntity {
             throw new IllegalArgumentException("schemaCatalogId 는 필수입니다.");
         }
         return CodeValue.builder()
-                .codeValueId(codeValueId)
-                .schemaCatalogId(schemaCatalogId)
+                .codeValueId(new CodeValueId(codeValueId))
+                .schemaCatalogId(new SchemaCatalogId(schemaCatalogId))
                 .code(new Code(code))
                 .label(label == null ? null : new Label(label))
                 .synonyms(synonyms == null ? null : new CodeValueSynonyms(synonyms))

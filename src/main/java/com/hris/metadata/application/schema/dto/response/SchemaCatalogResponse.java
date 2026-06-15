@@ -35,7 +35,7 @@ public class SchemaCatalogResponse {
 
     public static SchemaCatalogResponse from(SchemaCatalog catalog) {
         return SchemaCatalogResponse.builder()
-                .schemaCatalogId(catalog.getSchemaCatalogId())
+                .schemaCatalogId(catalog.getSchemaCatalogId().value())
                 .physicalTable(catalog.getPhysicalTable().value())
                 .physicalColumn(catalog.getPhysicalColumn().value())
                 .dataType(catalog.getDataType() == null ? null : catalog.getDataType().value())

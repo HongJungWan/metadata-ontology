@@ -99,7 +99,7 @@ public class DictionaryImportService {
             }
             createdTerms = 1;
         }
-        int createdSynonyms = createSynonymIfPresent(term.getTermId(), columns, rowNumber, skipped);
+        int createdSynonyms = createSynonymIfPresent(term.getTermId().value(), columns, rowNumber, skipped);
         return new RowResult(createdTerms, createdSynonyms);
     }
 

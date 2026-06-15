@@ -4,6 +4,8 @@ import com.hris.metadata.domain.schema.CodeValue;
 import com.hris.metadata.domain.schema.CodeValueRepository;
 import com.hris.metadata.domain.schema.SchemaCatalog;
 import com.hris.metadata.domain.schema.SchemaCatalogRepository;
+import com.hris.metadata.domain.schema.vo.CodeValueId;
+import com.hris.metadata.domain.schema.vo.SchemaCatalogId;
 import com.hris.metadata.global.exception.BusinessException;
 import com.hris.metadata.global.exception.ErrorCode;
 import com.hris.metadata.application.schema.command.AddCodeValueCommand;
@@ -71,19 +73,19 @@ public class SchemaCatalogService {
     }
 
     public List<CodeValueResponse> getCodeValues(UUID schemaCatalogId) {
-        return codeValueRepository.findAllBySchemaCatalogId(schemaCatalogId).stream()
+        return codeValueRepository.findAllBySchemaCatalogId(new SchemaCatalogId(schemaCatalogId)).stream()
                 .map(CodeValueResponse::from).toList();
     }
 
     @Transactional
     public void deleteCodeValue(UUID codeValueId) {
-        CodeValue codeValue = codeValueRepository.findById(codeValueId)
+        CodeValue codeValue = codeValueRepository.findById(new CodeValueId(codeValueId))
                 .orElseThrow(() -> new BusinessException(ErrorCode.CODE_VALUE_NOT_FOUND));
         codeValue.softDelete();
     }
 
     private SchemaCatalog getCatalogOrThrow(UUID schemaCatalogId) {
-        return schemaCatalogRepository.findById(schemaCatalogId)
+        return schemaCatalogRepository.findById(new SchemaCatalogId(schemaCatalogId))
                 .orElseThrow(() -> new BusinessException(ErrorCode.SCHEMA_CATALOG_NOT_FOUND));
     }
 }

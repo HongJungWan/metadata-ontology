@@ -1,8 +1,9 @@
 package com.hris.metadata.domain.pattern;
 
+import com.hris.metadata.domain.pattern.vo.SqlPatternId;
+
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 
 /**
  * SQL 패턴 리포지토리 포트 (도메인 소유, 구현은 infrastructure — DIP).
@@ -15,7 +16,7 @@ public interface SqlPatternRepository {
 
     List<SqlPattern> findAll();
 
-    Optional<SqlPattern> findById(UUID sqlPatternId);
+    Optional<SqlPattern> findById(SqlPatternId sqlPatternId);
 
     /**
      * 키워드가 trigger_keywords 에 포함된 패턴을 priority 오름차순으로 조회한다.

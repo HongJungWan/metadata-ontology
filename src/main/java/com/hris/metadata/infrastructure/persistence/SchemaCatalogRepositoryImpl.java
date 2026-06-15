@@ -2,12 +2,12 @@ package com.hris.metadata.infrastructure.persistence;
 
 import com.hris.metadata.domain.schema.SchemaCatalog;
 import com.hris.metadata.domain.schema.SchemaCatalogRepository;
+import com.hris.metadata.domain.schema.vo.SchemaCatalogId;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 
 /**
  * SchemaCatalogRepository 포트의 어댑터 (infrastructure). Spring Data JPA 에 위임한다.
@@ -34,7 +34,7 @@ public class SchemaCatalogRepositoryImpl implements SchemaCatalogRepository {
     }
 
     @Override
-    public Optional<SchemaCatalog> findById(UUID schemaCatalogId) {
+    public Optional<SchemaCatalog> findById(SchemaCatalogId schemaCatalogId) {
         return jpa.findById(schemaCatalogId);
     }
 

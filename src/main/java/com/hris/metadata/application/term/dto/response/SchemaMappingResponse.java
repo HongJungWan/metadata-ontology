@@ -32,9 +32,9 @@ public class SchemaMappingResponse {
 
     public static SchemaMappingResponse from(SchemaMapping mapping) {
         return SchemaMappingResponse.builder()
-                .schemaMappingId(mapping.getSchemaMappingId())
-                .termId(mapping.getTermId())
-                .schemaCatalogId(mapping.getSchemaCatalogId())
+                .schemaMappingId(mapping.getSchemaMappingId().value())
+                .termId(mapping.getTermId().value())
+                .schemaCatalogId(mapping.getSchemaCatalogId().value())
                 .mappingType(mapping.getMappingType() == null ? null : mapping.getMappingType().value())
                 .codeValueRule(mapping.getCodeValueRule() == null ? null : mapping.getCodeValueRule().value())
                 .build();

@@ -12,6 +12,7 @@ import com.hris.metadata.domain.term.Synonym;
 import com.hris.metadata.domain.term.SynonymRepository;
 import com.hris.metadata.domain.term.Term;
 import com.hris.metadata.domain.term.TermRepository;
+import com.hris.metadata.domain.term.vo.TermId;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -21,7 +22,6 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 /**
@@ -79,7 +79,7 @@ public class PromptContextService {
     }
 
     private String build(List<Term> terms) {
-        List<UUID> termIds = terms.stream().map(Term::getTermId).toList();
+        List<TermId> termIds = terms.stream().map(Term::getTermId).toList();
 
         StringBuilder builder = new StringBuilder();
         builder.append("[검색 가능한 스키마]\n");
@@ -89,7 +89,7 @@ public class PromptContextService {
         return builder.toString().stripTrailing();
     }
 
-    private void appendSchemaSection(StringBuilder builder, List<UUID> termIds) {
+    private void appendSchemaSection(StringBuilder builder, List<TermId> termIds) {
         List<ColumnMapping> rows = schemaMappingRepository.findColumnMappingsByTermIds(termIds);
 
         Set<String> renderedTables = new LinkedHashSet<>();

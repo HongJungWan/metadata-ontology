@@ -1,8 +1,10 @@
 package com.hris.metadata.domain.term;
 
+import com.hris.metadata.domain.term.vo.SynonymId;
+import com.hris.metadata.domain.term.vo.TermId;
+
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 
 /**
  * 동의어 리포지토리 포트 (도메인 소유, 구현은 infrastructure — DIP).
@@ -13,9 +15,9 @@ public interface SynonymRepository {
 
     long count();
 
-    Optional<Synonym> findById(UUID synonymId);
+    Optional<Synonym> findById(SynonymId synonymId);
 
-    List<Synonym> findAllByTermId(UUID termId);
+    List<Synonym> findAllByTermId(TermId termId);
 
     /**
      * 표면형(surface) 으로 동의어를 조회해 표준 용어 정식 명칭과 함께 돌려준다.
