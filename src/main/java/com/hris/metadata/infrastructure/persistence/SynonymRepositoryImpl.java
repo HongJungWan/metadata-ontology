@@ -5,6 +5,8 @@ import com.hris.metadata.domain.term.QTerm;
 import com.hris.metadata.domain.term.Synonym;
 import com.hris.metadata.domain.term.SynonymMatch;
 import com.hris.metadata.domain.term.SynonymRepository;
+import com.hris.metadata.domain.term.vo.SynonymId;
+import com.hris.metadata.domain.term.vo.TermId;
 import com.querydsl.core.Tuple;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
@@ -15,7 +17,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-import java.util.UUID;
 
 /**
  * SynonymRepository 포트의 어댑터 (infrastructure) — H2/기본 프로파일(postgres 제외).
@@ -44,12 +45,12 @@ public class SynonymRepositoryImpl implements SynonymRepository {
     }
 
     @Override
-    public Optional<Synonym> findById(UUID synonymId) {
+    public Optional<Synonym> findById(SynonymId synonymId) {
         return jpa.findById(synonymId);
     }
 
     @Override
-    public List<Synonym> findAllByTermId(UUID termId) {
+    public List<Synonym> findAllByTermId(TermId termId) {
         return jpa.findAllByTermId(termId);
     }
 
@@ -59,18 +60,18 @@ public class SynonymRepositoryImpl implements SynonymRepository {
         QTerm term = QTerm.term;
 
         Tuple result = queryFactory
-                .select(synonym.surface, term.canonicalName)
+                .select(synonym.surface.value, term.canonicalName.value)
                 .from(synonym)
                 .join(term).on(synonym.termId.eq(term.termId))
-                .where(synonym.surface.eq(surface))
+                .where(synonym.surface.value.eq(surface))
                 .fetchFirst();
 
         if (result == null) {
             return Optional.empty();
         }
         return Optional.of(new SynonymMatch(
-                result.get(synonym.surface),
-                result.get(term.canonicalName)));
+                result.get(synonym.surface.value),
+                result.get(term.canonicalName.value)));
     }
 
     @Override
@@ -84,7 +85,7 @@ public class SynonymRepositoryImpl implements SynonymRepository {
         // 후보 전체(표면형+표준명)를 한 번에 읽어 Java 트라이그램 유사도로 최상위를 고른다.
         // 동의어 규모가 작아(수백 건) 전수 비교로 충분하며, pg_trgm 과 동일한 Jaccard 의미를 따른다.
         List<Tuple> candidates = queryFactory
-                .select(synonym.surface, term.canonicalName)
+                .select(synonym.surface.value, term.canonicalName.value)
                 .from(synonym)
                 .join(term).on(synonym.termId.eq(term.termId))
                 .fetch();
@@ -93,10 +94,10 @@ public class SynonymRepositoryImpl implements SynonymRepository {
         String bestCanonical = null;
         double bestSim = -1;
         for (Tuple candidate : candidates) {
-            double sim = jaccard(queryGrams, trigrams(candidate.get(synonym.surface)));
+            double sim = jaccard(queryGrams, trigrams(candidate.get(synonym.surface.value)));
             if (sim >= threshold && sim > bestSim) {
                 bestSim = sim;
-                bestCanonical = candidate.get(term.canonicalName);
+                bestCanonical = candidate.get(term.canonicalName.value);
             }
         }
         return bestCanonical == null

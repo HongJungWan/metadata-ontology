@@ -12,6 +12,7 @@ import com.hris.metadata.domain.term.Synonym;
 import com.hris.metadata.domain.term.SynonymRepository;
 import com.hris.metadata.domain.term.Term;
 import com.hris.metadata.domain.term.TermRepository;
+import com.hris.metadata.domain.term.vo.TermId;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -21,7 +22,6 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 /**
@@ -79,7 +79,7 @@ public class PromptContextService {
     }
 
     private String build(List<Term> terms) {
-        List<UUID> termIds = terms.stream().map(Term::getTermId).toList();
+        List<TermId> termIds = terms.stream().map(Term::getTermId).toList();
 
         StringBuilder builder = new StringBuilder();
         builder.append("[검색 가능한 스키마]\n");
@@ -89,7 +89,7 @@ public class PromptContextService {
         return builder.toString().stripTrailing();
     }
 
-    private void appendSchemaSection(StringBuilder builder, List<UUID> termIds) {
+    private void appendSchemaSection(StringBuilder builder, List<TermId> termIds) {
         List<ColumnMapping> rows = schemaMappingRepository.findColumnMappingsByTermIds(termIds);
 
         Set<String> renderedTables = new LinkedHashSet<>();
@@ -106,6 +106,7 @@ public class PromptContextService {
                 .findByPhysicalTableAndPhysicalColumn(row.physicalTable(), row.physicalColumn());
         builder.append("- ").append(row.physicalColumn());
         catalog.map(SchemaCatalog::getDescription)
+                .map(description -> description == null ? null : description.value())
                 .filter(description -> description != null && !description.isBlank())
                 .ifPresent(description -> builder.append(": ").append(description));
         catalog.ifPresent(value -> appendCodeValues(builder, value));
@@ -118,16 +119,17 @@ public class PromptContextService {
             return;
         }
         String joined = codeValues.stream()
-                .map(code -> code.getCode() + "=" + (code.getLabel() == null ? code.getCode() : code.getLabel()))
+                .map(code -> code.getCode().value() + "="
+                        + (code.getLabel() == null ? code.getCode().value() : code.getLabel().value()))
                 .collect(Collectors.joining(", "));
         builder.append(" (").append(joined).append(")");
     }
 
     private void appendTermSection(StringBuilder builder, List<Term> terms) {
         for (Term term : terms) {
-            builder.append(term.getCanonicalName());
-            if (term.getDefinition() != null && !term.getDefinition().isBlank()) {
-                builder.append(" = ").append(term.getDefinition());
+            builder.append(term.getCanonicalName().value());
+            if (term.getDefinition() != null && !term.getDefinition().value().isBlank()) {
+                builder.append(" = ").append(term.getDefinition().value());
             }
             appendSynonyms(builder, term);
             builder.append("\n");
@@ -139,7 +141,8 @@ public class PromptContextService {
         if (synonyms.isEmpty()) {
             return;
         }
-        String joined = synonyms.stream().map(Synonym::getSurface).collect(Collectors.joining(", "));
+        String joined = synonyms.stream().map(synonym -> synonym.getSurface().value())
+                .collect(Collectors.joining(", "));
         builder.append(" (동의어: ").append(joined).append(")");
     }
 }

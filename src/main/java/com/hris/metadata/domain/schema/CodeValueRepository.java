@@ -1,8 +1,10 @@
 package com.hris.metadata.domain.schema;
 
+import com.hris.metadata.domain.schema.vo.CodeValueId;
+import com.hris.metadata.domain.schema.vo.SchemaCatalogId;
+
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 
 /**
  * 코드값 사전 리포지토리 포트 (도메인 소유, 구현은 infrastructure — DIP).
@@ -11,9 +13,9 @@ public interface CodeValueRepository {
 
     CodeValue save(CodeValue codeValue);
 
-    Optional<CodeValue> findById(UUID codeValueId);
+    Optional<CodeValue> findById(CodeValueId codeValueId);
 
-    List<CodeValue> findAllBySchemaCatalogId(UUID schemaCatalogId);
+    List<CodeValue> findAllBySchemaCatalogId(SchemaCatalogId schemaCatalogId);
 
     /**
      * 표면형(코드/라벨/동의어)에 해당하는 코드값 후보를 물리 테이블·컬럼과 함께 찾는다.

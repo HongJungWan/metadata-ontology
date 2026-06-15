@@ -35,12 +35,12 @@ public class SchemaCatalogResponse {
 
     public static SchemaCatalogResponse from(SchemaCatalog catalog) {
         return SchemaCatalogResponse.builder()
-                .schemaCatalogId(catalog.getSchemaCatalogId())
-                .physicalTable(catalog.getPhysicalTable())
-                .physicalColumn(catalog.getPhysicalColumn())
-                .dataType(catalog.getDataType())
-                .description(catalog.getDescription())
-                .sourceSystem(catalog.getSourceSystem())
+                .schemaCatalogId(catalog.getSchemaCatalogId().value())
+                .physicalTable(catalog.getPhysicalTable().value())
+                .physicalColumn(catalog.getPhysicalColumn().value())
+                .dataType(catalog.getDataType() == null ? null : catalog.getDataType().value())
+                .description(catalog.getDescription() == null ? null : catalog.getDescription().value())
+                .sourceSystem(catalog.getSourceSystem() == null ? null : catalog.getSourceSystem().value())
                 .build();
     }
 }

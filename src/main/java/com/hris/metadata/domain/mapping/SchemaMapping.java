@@ -1,12 +1,19 @@
 package com.hris.metadata.domain.mapping;
 
+import com.hris.metadata.domain.mapping.vo.CodeValueRule;
+import com.hris.metadata.domain.mapping.vo.MappingType;
+import com.hris.metadata.domain.mapping.vo.SchemaMappingId;
+import com.hris.metadata.domain.schema.vo.SchemaCatalogId;
+import com.hris.metadata.domain.term.vo.TermId;
 import com.hris.metadata.global.common.BaseEntity;
 import com.hris.metadata.shared.ddd.AggregateRoot;
 import com.hris.metadata.shared.ddd.Subdomain;
 import com.hris.metadata.shared.ddd.SubdomainType;
+import jakarta.persistence.AttributeOverride;
 import jakarta.persistence.Column;
+import jakarta.persistence.Embedded;
+import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
 import jakarta.persistence.Index;
 import jakarta.persistence.Table;
 import lombok.AccessLevel;
@@ -44,25 +51,29 @@ import java.util.UUID;
 public class SchemaMapping extends BaseEntity {
 
     /** 매핑 ID (PK) */
-    @Id
-    @Column(name = "schema_mapping_id", nullable = false, columnDefinition = "uuid")
-    private UUID schemaMappingId;
+    @EmbeddedId
+    @AttributeOverride(name = "value", column = @Column(name = "schema_mapping_id", nullable = false, columnDefinition = "uuid"))
+    private SchemaMappingId schemaMappingId;
 
     /** 표준 용어 ID (FK) */
-    @Column(name = "term_id", nullable = false, columnDefinition = "uuid")
-    private UUID termId;
+    @Embedded
+    @AttributeOverride(name = "value", column = @Column(name = "term_id", nullable = false, columnDefinition = "uuid"))
+    private TermId termId;
 
     /** 물리 스키마 카탈로그 ID (FK) */
-    @Column(name = "schema_catalog_id", nullable = false, columnDefinition = "uuid")
-    private UUID schemaCatalogId;
+    @Embedded
+    @AttributeOverride(name = "value", column = @Column(name = "schema_catalog_id", nullable = false, columnDefinition = "uuid"))
+    private SchemaCatalogId schemaCatalogId;
 
     /** 매핑 유형 (예: DIRECT, CODE_VALUE) */
-    @Column(name = "mapping_type", length = 50)
-    private String mappingType;
+    @Embedded
+    @AttributeOverride(name = "value", column = @Column(name = "mapping_type", length = 50))
+    private MappingType mappingType;
 
     /** 코드값 규칙 (예: "PENDING" — 동의어가 특정 코드값을 가리킬 때) */
-    @Column(name = "code_value_rule", length = 200)
-    private String codeValueRule;
+    @Embedded
+    @AttributeOverride(name = "value", column = @Column(name = "code_value_rule", length = 200))
+    private CodeValueRule codeValueRule;
 
     /**
      * 매핑 생성 (불변식 강제).
@@ -82,17 +93,17 @@ public class SchemaMapping extends BaseEntity {
             throw new IllegalArgumentException("schemaCatalogId 는 필수입니다.");
         }
         return SchemaMapping.builder()
-                .schemaMappingId(schemaMappingId)
-                .termId(termId)
-                .schemaCatalogId(schemaCatalogId)
-                .mappingType(mappingType)
-                .codeValueRule(codeValueRule)
+                .schemaMappingId(new SchemaMappingId(schemaMappingId))
+                .termId(new TermId(termId))
+                .schemaCatalogId(new SchemaCatalogId(schemaCatalogId))
+                .mappingType(mappingType == null ? null : new MappingType(mappingType))
+                .codeValueRule(codeValueRule == null ? null : new CodeValueRule(codeValueRule))
                 .build();
     }
 
     /** 매핑 필드 수정 (JPA dirty checking) */
     public void update(String mappingType, String codeValueRule) {
-        this.mappingType = mappingType;
-        this.codeValueRule = codeValueRule;
+        this.mappingType = mappingType == null ? null : new MappingType(mappingType);
+        this.codeValueRule = codeValueRule == null ? null : new CodeValueRule(codeValueRule);
     }
 }

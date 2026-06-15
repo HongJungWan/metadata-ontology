@@ -5,6 +5,8 @@ import com.hris.metadata.domain.term.QTerm;
 import com.hris.metadata.domain.term.Synonym;
 import com.hris.metadata.domain.term.SynonymMatch;
 import com.hris.metadata.domain.term.SynonymRepository;
+import com.hris.metadata.domain.term.vo.SynonymId;
+import com.hris.metadata.domain.term.vo.TermId;
 import com.querydsl.core.Tuple;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import org.springframework.context.annotation.Profile;
@@ -14,7 +16,6 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 
 /**
  * SynonymRepository 포트의 PostgreSQL 어댑터 — postgres 프로파일 전용.
@@ -49,12 +50,12 @@ public class PostgresSynonymRepositoryImpl implements SynonymRepository {
     }
 
     @Override
-    public Optional<Synonym> findById(UUID synonymId) {
+    public Optional<Synonym> findById(SynonymId synonymId) {
         return jpa.findById(synonymId);
     }
 
     @Override
-    public List<Synonym> findAllByTermId(UUID termId) {
+    public List<Synonym> findAllByTermId(TermId termId) {
         return jpa.findAllByTermId(termId);
     }
 
@@ -63,15 +64,15 @@ public class PostgresSynonymRepositoryImpl implements SynonymRepository {
         QSynonym synonym = QSynonym.synonym;
         QTerm term = QTerm.term;
         Tuple result = queryFactory
-                .select(synonym.surface, term.canonicalName)
+                .select(synonym.surface.value, term.canonicalName.value)
                 .from(synonym)
                 .join(term).on(synonym.termId.eq(term.termId))
-                .where(synonym.surface.eq(surface))
+                .where(synonym.surface.value.eq(surface))
                 .fetchFirst();
         if (result == null) {
             return Optional.empty();
         }
-        return Optional.of(new SynonymMatch(result.get(synonym.surface), result.get(term.canonicalName)));
+        return Optional.of(new SynonymMatch(result.get(synonym.surface.value), result.get(term.canonicalName.value)));
     }
 
     @Override

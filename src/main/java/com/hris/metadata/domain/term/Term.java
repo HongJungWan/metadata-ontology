@@ -1,14 +1,20 @@
 package com.hris.metadata.domain.term;
 
+import com.hris.metadata.domain.term.vo.CanonicalName;
+import com.hris.metadata.domain.term.vo.Definition;
+import com.hris.metadata.domain.term.vo.TermDomain;
+import com.hris.metadata.domain.term.vo.TermId;
 import com.hris.metadata.global.common.BaseEntity;
 import com.hris.metadata.shared.ddd.AggregateRoot;
 import com.hris.metadata.shared.ddd.Subdomain;
 import com.hris.metadata.shared.ddd.SubdomainType;
+import jakarta.persistence.AttributeOverride;
 import jakarta.persistence.Column;
+import jakarta.persistence.Embedded;
+import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
-import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 import lombok.AccessLevel;
@@ -40,21 +46,24 @@ import java.util.UUID;
 public class Term extends BaseEntity {
 
     /** 표준 용어 ID (PK) */
-    @Id
-    @Column(name = "term_id", nullable = false, columnDefinition = "uuid")
-    private UUID termId;
+    @EmbeddedId
+    @AttributeOverride(name = "value", column = @Column(name = "term_id", nullable = false, columnDefinition = "uuid"))
+    private TermId termId;
 
     /** 정식 명칭 (예: 정산금액) */
-    @Column(name = "canonical_name", nullable = false, length = 200)
-    private String canonicalName;
+    @Embedded
+    @AttributeOverride(name = "value", column = @Column(name = "canonical_name", nullable = false, length = 200))
+    private CanonicalName canonicalName;
 
     /** 도메인 (예: settlement) */
-    @Column(name = "domain", length = 100)
-    private String domain;
+    @Embedded
+    @AttributeOverride(name = "value", column = @Column(name = "domain", length = 100))
+    private TermDomain domain;
 
     /** 용어 정의 */
-    @Column(name = "definition", length = 1000)
-    private String definition;
+    @Embedded
+    @AttributeOverride(name = "value", column = @Column(name = "definition", length = 1000))
+    private Definition definition;
 
     /** 거버넌스 상태 (ACTIVE/DRAFT/DEPRECATED) */
     @Enumerated(EnumType.STRING)
@@ -71,26 +80,20 @@ public class Term extends BaseEntity {
         if (termId == null) {
             throw new IllegalArgumentException("termId 는 필수입니다.");
         }
-        if (canonicalName == null || canonicalName.isBlank()) {
-            throw new IllegalArgumentException("canonicalName 은 공백일 수 없습니다.");
-        }
-        if (domain == null || domain.isBlank()) {
-            throw new IllegalArgumentException("domain 은 공백일 수 없습니다.");
-        }
         return Term.builder()
-                .termId(termId)
-                .canonicalName(canonicalName)
-                .domain(domain)
-                .definition(definition)
+                .termId(new TermId(termId))
+                .canonicalName(new CanonicalName(canonicalName))
+                .domain(new TermDomain(domain))
+                .definition(definition == null ? null : new Definition(definition))
                 .status(TermStatus.ACTIVE)
                 .build();
     }
 
     /** 용어 필드 수정 (JPA dirty checking). 상태 전이는 changeStatus 의 라이프사이클 규칙을 따른다. */
     public void update(String canonicalName, String domain, String definition, TermStatus status) {
-        this.canonicalName = canonicalName;
-        this.domain = domain;
-        this.definition = definition;
+        this.canonicalName = new CanonicalName(canonicalName);
+        this.domain = new TermDomain(domain);
+        this.definition = definition == null ? null : new Definition(definition);
         changeStatus(status);
     }
 

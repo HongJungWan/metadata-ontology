@@ -2,6 +2,7 @@ package com.hris.metadata.application.pattern;
 
 import com.hris.metadata.domain.pattern.SqlPattern;
 import com.hris.metadata.domain.pattern.SqlPatternRepository;
+import com.hris.metadata.domain.pattern.vo.SqlPatternId;
 import com.hris.metadata.global.exception.BusinessException;
 import com.hris.metadata.global.exception.ErrorCode;
 import com.hris.metadata.application.pattern.command.DefineSqlPatternCommand;
@@ -50,7 +51,7 @@ public class SqlPatternAdminService {
     }
 
     private SqlPattern getOrThrow(UUID sqlPatternId) {
-        return sqlPatternRepository.findById(sqlPatternId)
+        return sqlPatternRepository.findById(new SqlPatternId(sqlPatternId))
                 .orElseThrow(() -> new BusinessException(ErrorCode.SQL_PATTERN_NOT_FOUND));
     }
 }
