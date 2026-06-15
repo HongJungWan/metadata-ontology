@@ -1,10 +1,17 @@
 package com.hris.metadata.domain.schema;
 
+import com.hris.metadata.domain.schema.vo.DataType;
+import com.hris.metadata.domain.schema.vo.Description;
+import com.hris.metadata.domain.schema.vo.PhysicalColumn;
+import com.hris.metadata.domain.schema.vo.PhysicalTable;
+import com.hris.metadata.domain.schema.vo.SourceSystem;
 import com.hris.metadata.global.common.BaseEntity;
 import com.hris.metadata.shared.ddd.AggregateRoot;
 import com.hris.metadata.shared.ddd.Subdomain;
 import com.hris.metadata.shared.ddd.SubdomainType;
+import jakarta.persistence.AttributeOverride;
 import jakarta.persistence.Column;
+import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Index;
@@ -43,24 +50,29 @@ public class SchemaCatalog extends BaseEntity {
     private UUID schemaCatalogId;
 
     /** 물리 테이블명 (예: settlement) */
-    @Column(name = "physical_table", nullable = false, length = 200)
-    private String physicalTable;
+    @Embedded
+    @AttributeOverride(name = "value", column = @Column(name = "physical_table", nullable = false, length = 200))
+    private PhysicalTable physicalTable;
 
     /** 물리 컬럼명 (예: settlement_amount) */
-    @Column(name = "physical_column", nullable = false, length = 200)
-    private String physicalColumn;
+    @Embedded
+    @AttributeOverride(name = "value", column = @Column(name = "physical_column", nullable = false, length = 200))
+    private PhysicalColumn physicalColumn;
 
     /** 데이터 타입 (예: numeric, varchar, date) */
-    @Column(name = "data_type", length = 100)
-    private String dataType;
+    @Embedded
+    @AttributeOverride(name = "value", column = @Column(name = "data_type", length = 100))
+    private DataType dataType;
 
     /** 컬럼 설명 */
-    @Column(name = "description", length = 1000)
-    private String description;
+    @Embedded
+    @AttributeOverride(name = "value", column = @Column(name = "description", length = 1000))
+    private Description description;
 
     /** 출처 시스템 (예: redshift, glue) */
-    @Column(name = "source_system", length = 100)
-    private String sourceSystem;
+    @Embedded
+    @AttributeOverride(name = "value", column = @Column(name = "source_system", length = 100))
+    private SourceSystem sourceSystem;
 
     /**
      * 스키마 카탈로그 생성 (불변식 강제).
@@ -73,29 +85,23 @@ public class SchemaCatalog extends BaseEntity {
         if (schemaCatalogId == null) {
             throw new IllegalArgumentException("schemaCatalogId 는 필수입니다.");
         }
-        if (physicalTable == null || physicalTable.isBlank()) {
-            throw new IllegalArgumentException("physicalTable 은 공백일 수 없습니다.");
-        }
-        if (physicalColumn == null || physicalColumn.isBlank()) {
-            throw new IllegalArgumentException("physicalColumn 은 공백일 수 없습니다.");
-        }
         return SchemaCatalog.builder()
                 .schemaCatalogId(schemaCatalogId)
-                .physicalTable(physicalTable)
-                .physicalColumn(physicalColumn)
-                .dataType(dataType)
-                .description(description)
-                .sourceSystem(sourceSystem)
+                .physicalTable(new PhysicalTable(physicalTable))
+                .physicalColumn(new PhysicalColumn(physicalColumn))
+                .dataType(dataType == null ? null : new DataType(dataType))
+                .description(description == null ? null : new Description(description))
+                .sourceSystem(sourceSystem == null ? null : new SourceSystem(sourceSystem))
                 .build();
     }
 
     /** 카탈로그 필드 수정 (JPA dirty checking) */
     public void update(String physicalTable, String physicalColumn, String dataType,
                        String description, String sourceSystem) {
-        this.physicalTable = physicalTable;
-        this.physicalColumn = physicalColumn;
-        this.dataType = dataType;
-        this.description = description;
-        this.sourceSystem = sourceSystem;
+        this.physicalTable = new PhysicalTable(physicalTable);
+        this.physicalColumn = new PhysicalColumn(physicalColumn);
+        this.dataType = dataType == null ? null : new DataType(dataType);
+        this.description = description == null ? null : new Description(description);
+        this.sourceSystem = sourceSystem == null ? null : new SourceSystem(sourceSystem);
     }
 }

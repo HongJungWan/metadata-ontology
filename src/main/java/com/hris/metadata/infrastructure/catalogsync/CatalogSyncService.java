@@ -70,9 +70,12 @@ public class CatalogSyncService {
     }
 
     private boolean updateIfChanged(SchemaCatalog existing, PhysicalColumnSnapshot s) {
-        boolean changed = !equalsNullable(existing.getDataType(), s.dataType())
-                || !equalsNullable(existing.getDescription(), s.description())
-                || !equalsNullable(existing.getSourceSystem(), s.sourceSystem());
+        boolean changed = !equalsNullable(
+                        existing.getDataType() == null ? null : existing.getDataType().value(), s.dataType())
+                || !equalsNullable(
+                        existing.getDescription() == null ? null : existing.getDescription().value(), s.description())
+                || !equalsNullable(
+                        existing.getSourceSystem() == null ? null : existing.getSourceSystem().value(), s.sourceSystem());
         if (changed) {
             existing.update(s.physicalTable(), s.physicalColumn(), s.dataType(), s.description(), s.sourceSystem());
             schemaCatalogRepository.save(existing);

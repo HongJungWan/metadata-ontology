@@ -49,7 +49,7 @@ public class SqlPatternRepositoryImpl implements SqlPatternRepository {
 
         return queryFactory
                 .selectFrom(pattern)
-                .where(pattern.triggerKeywords.contains(keyword))
+                .where(pattern.triggerKeywords.value.contains(keyword))
                 .orderBy(pattern.priority.asc())
                 .fetch();
     }

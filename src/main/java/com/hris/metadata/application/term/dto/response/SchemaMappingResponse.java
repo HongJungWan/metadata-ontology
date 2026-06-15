@@ -35,8 +35,8 @@ public class SchemaMappingResponse {
                 .schemaMappingId(mapping.getSchemaMappingId())
                 .termId(mapping.getTermId())
                 .schemaCatalogId(mapping.getSchemaCatalogId())
-                .mappingType(mapping.getMappingType())
-                .codeValueRule(mapping.getCodeValueRule())
+                .mappingType(mapping.getMappingType() == null ? null : mapping.getMappingType().value())
+                .codeValueRule(mapping.getCodeValueRule() == null ? null : mapping.getCodeValueRule().value())
                 .build();
     }
 }

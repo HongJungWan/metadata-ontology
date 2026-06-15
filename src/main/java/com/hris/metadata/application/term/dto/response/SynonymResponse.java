@@ -32,7 +32,7 @@ public class SynonymResponse {
         return SynonymResponse.builder()
                 .synonymId(synonym.getSynonymId())
                 .termId(synonym.getTermId())
-                .surface(synonym.getSurface())
+                .surface(synonym.getSurface().value())
                 .type(synonym.getType())
                 .build();
     }

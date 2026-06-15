@@ -1,10 +1,15 @@
 package com.hris.metadata.domain.schema;
 
+import com.hris.metadata.domain.schema.vo.Code;
+import com.hris.metadata.domain.schema.vo.CodeValueSynonyms;
+import com.hris.metadata.domain.schema.vo.Label;
 import com.hris.metadata.global.common.BaseEntity;
 import com.hris.metadata.shared.ddd.AggregateRoot;
 import com.hris.metadata.shared.ddd.Subdomain;
 import com.hris.metadata.shared.ddd.SubdomainType;
+import jakarta.persistence.AttributeOverride;
 import jakarta.persistence.Column;
+import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Index;
@@ -48,16 +53,19 @@ public class CodeValue extends BaseEntity {
     private UUID schemaCatalogId;
 
     /** 코드 (예: PENDING) */
-    @Column(name = "code", nullable = false, length = 100)
-    private String code;
+    @Embedded
+    @AttributeOverride(name = "value", column = @Column(name = "code", nullable = false, length = 100))
+    private Code code;
 
     /** 라벨 (예: 미정산) */
-    @Column(name = "label", length = 200)
-    private String label;
+    @Embedded
+    @AttributeOverride(name = "value", column = @Column(name = "label", length = 200))
+    private Label label;
 
     /** 코드값 동의어 (콤마 구분 문자열, 예: "미정산,대기") */
-    @Column(name = "synonyms", length = 500)
-    private String synonyms;
+    @Embedded
+    @AttributeOverride(name = "value", column = @Column(name = "synonyms", length = 500))
+    private CodeValueSynonyms synonyms;
 
     /**
      * 코드값 생성 (불변식 강제).
@@ -73,22 +81,19 @@ public class CodeValue extends BaseEntity {
         if (schemaCatalogId == null) {
             throw new IllegalArgumentException("schemaCatalogId 는 필수입니다.");
         }
-        if (code == null || code.isBlank()) {
-            throw new IllegalArgumentException("code 는 공백일 수 없습니다.");
-        }
         return CodeValue.builder()
                 .codeValueId(codeValueId)
                 .schemaCatalogId(schemaCatalogId)
-                .code(code.trim().toUpperCase())
-                .label(label)
-                .synonyms(synonyms)
+                .code(new Code(code))
+                .label(label == null ? null : new Label(label))
+                .synonyms(synonyms == null ? null : new CodeValueSynonyms(synonyms))
                 .build();
     }
 
     /** 코드값 필드 수정 (JPA dirty checking) */
     public void update(String code, String label, String synonyms) {
-        this.code = code;
-        this.label = label;
-        this.synonyms = synonyms;
+        this.code = new Code(code);
+        this.label = label == null ? null : new Label(label);
+        this.synonyms = synonyms == null ? null : new CodeValueSynonyms(synonyms);
     }
 }

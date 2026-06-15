@@ -1,10 +1,14 @@
 package com.hris.metadata.domain.mapping;
 
+import com.hris.metadata.domain.mapping.vo.CodeValueRule;
+import com.hris.metadata.domain.mapping.vo.MappingType;
 import com.hris.metadata.global.common.BaseEntity;
 import com.hris.metadata.shared.ddd.AggregateRoot;
 import com.hris.metadata.shared.ddd.Subdomain;
 import com.hris.metadata.shared.ddd.SubdomainType;
+import jakarta.persistence.AttributeOverride;
 import jakarta.persistence.Column;
+import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Index;
@@ -57,12 +61,14 @@ public class SchemaMapping extends BaseEntity {
     private UUID schemaCatalogId;
 
     /** 매핑 유형 (예: DIRECT, CODE_VALUE) */
-    @Column(name = "mapping_type", length = 50)
-    private String mappingType;
+    @Embedded
+    @AttributeOverride(name = "value", column = @Column(name = "mapping_type", length = 50))
+    private MappingType mappingType;
 
     /** 코드값 규칙 (예: "PENDING" — 동의어가 특정 코드값을 가리킬 때) */
-    @Column(name = "code_value_rule", length = 200)
-    private String codeValueRule;
+    @Embedded
+    @AttributeOverride(name = "value", column = @Column(name = "code_value_rule", length = 200))
+    private CodeValueRule codeValueRule;
 
     /**
      * 매핑 생성 (불변식 강제).
@@ -85,14 +91,14 @@ public class SchemaMapping extends BaseEntity {
                 .schemaMappingId(schemaMappingId)
                 .termId(termId)
                 .schemaCatalogId(schemaCatalogId)
-                .mappingType(mappingType)
-                .codeValueRule(codeValueRule)
+                .mappingType(mappingType == null ? null : new MappingType(mappingType))
+                .codeValueRule(codeValueRule == null ? null : new CodeValueRule(codeValueRule))
                 .build();
     }
 
     /** 매핑 필드 수정 (JPA dirty checking) */
     public void update(String mappingType, String codeValueRule) {
-        this.mappingType = mappingType;
-        this.codeValueRule = codeValueRule;
+        this.mappingType = mappingType == null ? null : new MappingType(mappingType);
+        this.codeValueRule = codeValueRule == null ? null : new CodeValueRule(codeValueRule);
     }
 }

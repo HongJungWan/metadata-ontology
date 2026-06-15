@@ -11,5 +11,5 @@ import java.util.UUID;
  */
 public interface SchemaCatalogJpaRepository extends JpaRepository<SchemaCatalog, UUID> {
 
-    Optional<SchemaCatalog> findByPhysicalTableAndPhysicalColumn(String physicalTable, String physicalColumn);
+    Optional<SchemaCatalog> findByPhysicalTableValueAndPhysicalColumnValue(String physicalTable, String physicalColumn);
 }

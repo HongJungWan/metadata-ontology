@@ -34,9 +34,9 @@ public class CodeValueResponse {
         return CodeValueResponse.builder()
                 .codeValueId(codeValue.getCodeValueId())
                 .schemaCatalogId(codeValue.getSchemaCatalogId())
-                .code(codeValue.getCode())
-                .label(codeValue.getLabel())
-                .synonyms(codeValue.getSynonyms())
+                .code(codeValue.getCode().value())
+                .label(codeValue.getLabel() == null ? null : codeValue.getLabel().value())
+                .synonyms(codeValue.getSynonyms() == null ? null : codeValue.getSynonyms().value())
                 .build();
     }
 }

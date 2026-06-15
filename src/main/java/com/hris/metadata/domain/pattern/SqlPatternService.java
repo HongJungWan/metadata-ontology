@@ -61,9 +61,9 @@ public class SqlPatternService {
     private SqlPatternMatch toMatch(String keyword, SqlPattern pattern) {
         return new SqlPatternMatch(
                 keyword,
-                pattern.getColumnTarget(),
+                pattern.getColumnTarget().value(),
                 pattern.getOperator(),
-                pattern.getValueTemplate(),
+                pattern.getValueTemplate() == null ? null : pattern.getValueTemplate().value(),
                 pattern.getPriority());
     }
 }

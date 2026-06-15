@@ -62,16 +62,16 @@ public class SchemaMappingRepositoryImpl implements SchemaMappingRepository {
         return queryFactory
                 .select(Projections.constructor(ColumnMapping.class,
                         term.termId,
-                        term.canonicalName,
-                        catalog.physicalTable,
-                        catalog.physicalColumn,
-                        mapping.codeValueRule))
+                        term.canonicalName.value,
+                        catalog.physicalTable.value,
+                        catalog.physicalColumn.value,
+                        mapping.codeValueRule.value))
                 .from(mapping)
                 .join(term).on(mapping.termId.eq(term.termId))
                 .join(catalog).on(mapping.schemaCatalogId.eq(catalog.schemaCatalogId))
                 .where(mapping.termId.in(termIds))
                 // PromptContextService 의 테이블 헤더 그룹핑이 행 연속성에 의존 — 정렬로 보장
-                .orderBy(catalog.physicalTable.asc(), catalog.physicalColumn.asc())
+                .orderBy(catalog.physicalTable.value.asc(), catalog.physicalColumn.value.asc())
                 .fetch();
     }
 }

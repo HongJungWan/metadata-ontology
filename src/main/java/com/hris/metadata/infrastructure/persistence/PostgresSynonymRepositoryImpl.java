@@ -63,15 +63,15 @@ public class PostgresSynonymRepositoryImpl implements SynonymRepository {
         QSynonym synonym = QSynonym.synonym;
         QTerm term = QTerm.term;
         Tuple result = queryFactory
-                .select(synonym.surface, term.canonicalName)
+                .select(synonym.surface.value, term.canonicalName.value)
                 .from(synonym)
                 .join(term).on(synonym.termId.eq(term.termId))
-                .where(synonym.surface.eq(surface))
+                .where(synonym.surface.value.eq(surface))
                 .fetchFirst();
         if (result == null) {
             return Optional.empty();
         }
-        return Optional.of(new SynonymMatch(result.get(synonym.surface), result.get(term.canonicalName)));
+        return Optional.of(new SynonymMatch(result.get(synonym.surface.value), result.get(term.canonicalName.value)));
     }
 
     @Override

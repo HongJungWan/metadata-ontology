@@ -23,8 +23,9 @@ public interface CodeValueJpaRepository extends JpaRepository<CodeValue, UUID> {
      * synonyms 는 콤마로 join 된 문자열이라 LIKE 로 1차 필터하고, 정확 일치는 호출부에서 재검증한다.
      */
     @Query("select new com.hris.metadata.domain.schema.CodeValueCandidate("
-            + "c.code, c.label, c.synonyms, sc.physicalTable, sc.physicalColumn) "
+            + "c.code.value, c.label.value, c.synonyms.value, sc.physicalTable.value, sc.physicalColumn.value) "
             + "from CodeValue c join SchemaCatalog sc on sc.schemaCatalogId = c.schemaCatalogId "
-            + "where c.code = :token or c.label = :token or c.synonyms like concat('%', :token, '%')")
+            + "where c.code.value = :token or c.label.value = :token "
+            + "or c.synonyms.value like concat('%', :token, '%')")
     List<CodeValueCandidate> findCandidatesBySurface(@Param("token") String token);
 }

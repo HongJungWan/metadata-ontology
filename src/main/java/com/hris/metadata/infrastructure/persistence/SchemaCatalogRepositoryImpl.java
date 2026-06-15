@@ -40,6 +40,6 @@ public class SchemaCatalogRepositoryImpl implements SchemaCatalogRepository {
 
     @Override
     public Optional<SchemaCatalog> findByPhysicalTableAndPhysicalColumn(String physicalTable, String physicalColumn) {
-        return jpa.findByPhysicalTableAndPhysicalColumn(physicalTable, physicalColumn);
+        return jpa.findByPhysicalTableValueAndPhysicalColumnValue(physicalTable, physicalColumn);
     }
 }

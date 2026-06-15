@@ -113,13 +113,12 @@ public class TermAdminService {
                 command.termId(), command.schemaCatalogId())) {
             throw new BusinessException(ErrorCode.DUPLICATE_MAPPING);
         }
-        SchemaMapping mapping = SchemaMapping.builder()
-                .schemaMappingId(UUID.randomUUID())
-                .termId(command.termId())
-                .schemaCatalogId(command.schemaCatalogId())
-                .mappingType(command.mappingType())
-                .codeValueRule(command.codeValueRule())
-                .build();
+        SchemaMapping mapping = SchemaMapping.create(
+                UUID.randomUUID(),
+                command.termId(),
+                command.schemaCatalogId(),
+                command.mappingType(),
+                command.codeValueRule());
         schemaMappingRepository.save(mapping);
         return SchemaMappingResponse.from(mapping);
     }

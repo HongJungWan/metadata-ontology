@@ -40,16 +40,16 @@ public class TermRepositoryImpl implements TermRepository {
 
     @Override
     public Optional<Term> findByCanonicalName(String canonicalName) {
-        return jpa.findByCanonicalName(canonicalName);
+        return jpa.findByCanonicalNameValue(canonicalName);
     }
 
     @Override
     public boolean existsByCanonicalName(String canonicalName) {
-        return jpa.existsByCanonicalName(canonicalName);
+        return jpa.existsByCanonicalNameValue(canonicalName);
     }
 
     @Override
     public List<Term> findAllByDomain(String domain) {
-        return jpa.findAllByDomain(domain);
+        return jpa.findAllByDomainValue(domain);
     }
 }

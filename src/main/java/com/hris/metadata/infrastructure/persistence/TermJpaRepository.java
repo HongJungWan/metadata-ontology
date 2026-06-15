@@ -12,9 +12,9 @@ import java.util.UUID;
  */
 public interface TermJpaRepository extends JpaRepository<Term, UUID> {
 
-    Optional<Term> findByCanonicalName(String canonicalName);
+    Optional<Term> findByCanonicalNameValue(String canonicalName);
 
-    boolean existsByCanonicalName(String canonicalName);
+    boolean existsByCanonicalNameValue(String canonicalName);
 
-    List<Term> findAllByDomain(String domain);
+    List<Term> findAllByDomainValue(String domain);
 }
