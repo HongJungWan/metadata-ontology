@@ -6,6 +6,7 @@ import com.hris.metadata.application.evaluation.dto.response.EvaluationReportRes
 import com.hris.metadata.application.resolve.ResolveOptions;
 import com.hris.metadata.application.resolve.ResolveService;
 import com.hris.metadata.application.resolve.dto.response.ResolveResponse;
+import com.hris.metadata.domain.mapping.MappingComparator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -33,6 +34,7 @@ public class RecallEvaluationService {
     private static final String GOLD_QUERIES_RESOURCE = "evaluation/gold_queries.csv";
 
     private final ResolveService resolveService;
+    private final MappingComparator mappingComparator;
 
     /**
      * 기본 정답셋({@code evaluation/gold_queries.csv})을 평가한다.
@@ -126,9 +128,9 @@ public class RecallEvaluationService {
     }
 
     private boolean matches(GoldQuery.ExpectedMapping expected, ResolveResponse.ColumnMapping returned) {
-        return expected.physicalTable().equals(returned.getPhysicalTable())
-                && expected.physicalColumn().equals(returned.getPhysicalColumn())
-                && (expected.code() == null || expected.code().equals(returned.getCodeValue()));
+        return mappingComparator.satisfies(
+                expected.physicalTable(), expected.physicalColumn(), expected.code(),
+                returned.getPhysicalTable(), returned.getPhysicalColumn(), returned.getCodeValue());
     }
 
     private ArmResult aggregate(String arm, List<GoldQuery> goldQueries, Map<String, QueryOutcome> outcomes) {

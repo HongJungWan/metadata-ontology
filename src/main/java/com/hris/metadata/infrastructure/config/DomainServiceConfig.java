@@ -1,6 +1,7 @@
 package com.hris.metadata.infrastructure.config;
 
 import com.hris.metadata.domain.expand.ExpansionService;
+import com.hris.metadata.domain.mapping.MappingComparator;
 import com.hris.metadata.domain.normalize.NormalizationService;
 import com.hris.metadata.domain.pattern.SqlPatternService;
 import com.hris.metadata.domain.pattern.SqlPatternRepository;
@@ -33,5 +34,10 @@ public class DomainServiceConfig {
     @Bean
     public SqlPatternService sqlPatternService(SqlPatternRepository sqlPatternRepository) {
         return new SqlPatternService(sqlPatternRepository);
+    }
+
+    @Bean
+    public MappingComparator mappingComparator() {
+        return new MappingComparator();
     }
 }
