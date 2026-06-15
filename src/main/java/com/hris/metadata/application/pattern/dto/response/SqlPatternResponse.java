@@ -41,7 +41,7 @@ public class SqlPatternResponse {
                 .columnTarget(pattern.getColumnTarget().value())
                 .operator(pattern.getOperator())
                 .valueTemplate(pattern.getValueTemplate() == null ? null : pattern.getValueTemplate().value())
-                .priority(pattern.getPriority())
+                .priority(pattern.getPriority().value())
                 .build();
     }
 }

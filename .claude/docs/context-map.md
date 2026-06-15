@@ -29,6 +29,11 @@
 - **관계 패턴**: 우리는 **Open Host Service (OHS)** — 안정적인 공개 REST API(`/api/resolve`,
   `/api/expand`, `/api/normalize`, `/api/match-sql-pattern`, `/api/prompt-context`)로 다운스트림에
   매핑 능력을 공개한다. JSON 계약은 published language 역할.
+- **Published Language 코드 표기**: 발행 언어 계약 타입은 `@PublishedLanguage` 마커로 명시한다
+  (`shared/ddd/PublishedLanguage`). 현재 knowledge-search 가 실제 소비하는 계약에 부착:
+  `ResolveResponse`(/api/resolve ↔ KS `MetadataResolveResult`)·`SchemaCatalogResponse`(/api/admin/schema/catalogs
+  ↔ KS `MetadataSchemaClient`). 이 타입의 필드 변경은 다운스트림 협의 필수. (그 외 /expand·/normalize·
+  /match-sql-pattern 는 도메인 결과 record 를 직접 직렬화 — 향후 전용 응답 DTO 분리 검토 대상.)
 - **knowledge-search 와의 방향**: 우리가 **Upstream(공급자)**, knowledge-search 가 **Downstream(소비자)**.
   소비자가 우리 모델을 그대로 받아쓰는 Conformist 성격(코드값·컬럼명을 그대로 사용).
 - **외부 ACL 불필요**: 운영 카탈로그 동기화(Glue/Redshift)는 현재 비활성(`catalog.sync.enabled=false`)이고,

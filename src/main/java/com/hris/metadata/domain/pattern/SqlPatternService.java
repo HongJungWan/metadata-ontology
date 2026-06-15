@@ -64,6 +64,6 @@ public class SqlPatternService {
                 pattern.getColumnTarget().value(),
                 pattern.getOperator(),
                 pattern.getValueTemplate() == null ? null : pattern.getValueTemplate().value(),
-                pattern.getPriority());
+                pattern.getPriority().value());
     }
 }

@@ -1,6 +1,7 @@
 package com.hris.metadata.application.resolve.dto.response;
 
 import com.hris.metadata.domain.normalize.TimeRange;
+import com.hris.metadata.shared.ddd.PublishedLanguage;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -10,10 +11,12 @@ import lombok.NoArgsConstructor;
 import java.util.List;
 
 /**
- * /resolve 응답.
+ * /resolve 응답 — knowledge-search 가 의존하는 OHS 발행 언어(Published Language).
  * <p>
  * P1 이 한 번의 호출로 표준용어·동의어확장·컬럼/코드값·기간을 받는다. PRD §4.1 형식을 따른다.
+ * 이 계약은 knowledge-search 의 {@code MetadataResolveResult} 와 1:1 대응한다 — 필드 변경 시 다운스트림 협의 필수.
  */
+@PublishedLanguage
 @Schema(description = "질의 해석 결과")
 @Getter
 @Builder

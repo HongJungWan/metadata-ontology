@@ -1,6 +1,7 @@
 package com.hris.metadata.domain.pattern;
 
 import com.hris.metadata.domain.pattern.vo.ColumnTarget;
+import com.hris.metadata.domain.pattern.vo.Priority;
 import com.hris.metadata.domain.pattern.vo.SqlPatternId;
 import com.hris.metadata.domain.pattern.vo.TriggerKeywords;
 import com.hris.metadata.domain.pattern.vo.ValueTemplate;
@@ -70,8 +71,9 @@ public class SqlPattern extends BaseEntity {
     private ValueTemplate valueTemplate;
 
     /** 우선순위 (낮을수록 우선) */
-    @Column(name = "priority", nullable = false)
-    private int priority;
+    @Embedded
+    @AttributeOverride(name = "value", column = @Column(name = "priority", nullable = false))
+    private Priority priority;
 
     /**
      * SQL 패턴 생성 (불변식 강제).
@@ -93,7 +95,7 @@ public class SqlPattern extends BaseEntity {
                 .columnTarget(new ColumnTarget(columnTarget))
                 .operator(operator)
                 .valueTemplate(valueTemplate == null ? null : new ValueTemplate(valueTemplate))
-                .priority(priority)
+                .priority(new Priority(priority))
                 .build();
     }
 
@@ -104,7 +106,7 @@ public class SqlPattern extends BaseEntity {
         this.columnTarget = new ColumnTarget(columnTarget);
         this.operator = operator;
         this.valueTemplate = valueTemplate == null ? null : new ValueTemplate(valueTemplate);
-        this.priority = priority;
+        this.priority = new Priority(priority);
     }
 
     /**

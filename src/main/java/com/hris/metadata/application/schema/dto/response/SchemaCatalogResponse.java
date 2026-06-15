@@ -1,6 +1,7 @@
 package com.hris.metadata.application.schema.dto.response;
 
 import com.hris.metadata.domain.schema.SchemaCatalog;
+import com.hris.metadata.shared.ddd.PublishedLanguage;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Builder;
 import lombok.Getter;
@@ -8,8 +9,10 @@ import lombok.Getter;
 import java.util.UUID;
 
 /**
- * 물리 스키마 카탈로그 응답.
+ * 물리 스키마 카탈로그 응답 — knowledge-search 가 list_schema 로 소비하는 OHS 발행 언어.
+ * 필드 변경 시 다운스트림(knowledge-search {@code MetadataSchemaClient}) 협의 필수.
  */
+@PublishedLanguage
 @Schema(description = "물리 스키마 카탈로그 응답")
 @Getter
 @Builder
