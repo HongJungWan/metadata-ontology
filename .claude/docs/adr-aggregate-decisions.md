@@ -43,3 +43,22 @@
 `canonicalName`/`physicalTable`/`physicalColumn`/`code`/`surface`/`triggerKeywords`/`valueTemplate` 은
 QueryDSL where/join 의 타깃 컬럼이다. VO 로 감싸면 Q타입·바인딩·`@Convert` 비용과 조인 깨짐 위험이 커서,
 실효 대비 리스크가 높다. 원시 타입 + 팩토리/컴팩트 생성자 검증으로 불변식을 지키고 VO 화는 보류한다.
+
+## 4. AWS catalog-sync ACL — 인터페이스 지금, 구현 연기 (2026-06-15)
+
+> 상태: Accepted. 컨텍스트: DDD 전수 감사 후속 외과적 개선(R3).
+
+미래의 Glue Data Catalog / Redshift `information_schema` 는 **외부 바운디드 컨텍스트**이므로,
+knowledge-search 의 `SettlementSourceAcl` 와 동일하게 **ACL 경계를 지금 정의**한다:
+포트 `application.schema.port.PhysicalCatalogSourcePort`(+ 번역 레코드 `PhysicalColumnSnapshot`),
+구현 `infrastructure.catalogsync.NoOpPhysicalCatalogSourceAdapter`(가드 no-op).
+
+### 결정
+- `CatalogSyncService` 는 외부 소스에 직접 접근하지 않고 포트가 돌려준 스냅샷을 `SchemaCatalog` 와
+  diff 해 upsert 하는 **오케스트레이션만** 한다(외부 모델이 도메인으로 새지 않게 경계 격리).
+- AWS 연동 코드(Glue/JDBC)는 어댑터 안에만 작성한다. `catalog.sync.enabled=false`(기본) 동안 어댑터는
+  빈 스냅샷을 반환하므로 upsert 경로는 휴면 상태다 — **임의로 켜지 않는다**(CLAUDE.md 원칙 유지).
+
+### 결과
+- ArchUnit `APPLICATION_NOT_DEPEND_ON_INFRASTRUCTURE`·`REPOSITORY_IMPL_IN_INFRA`·`DOMAIN_PURITY` 유지.
+- `software.amazon.awssdk` 등 외부 SDK 임포트는 향후에도 infra 어댑터에만 존재해야 한다.
