@@ -81,11 +81,11 @@
 - **DIP**: 도메인엔 포트 인터페이스만, 구현(`*RepositoryImpl`)은 infrastructure. `*RepositoryImpl`/`*RepositoryCustomImpl` 파일명은 domain 에서 금지.
 - **도메인 서비스(`@DomainService`)**: 순수 도메인 로직(Normalization/Expansion/SqlPattern 매칭)은 domain 에 plain 클래스로 둔다. Spring 스테레오타입 금지(가드 차단) → `infrastructure.config.DomainServiceConfig` 의 `@Bean` 으로 등록. 무상태(주입 포트는 `final`)만 허용. `LocalDate.now()` 등 시계는 도메인에서 호출 금지 → 호출자(application/presentation)가 기준일을 주입.
 - **차단(block) 규칙**: domain 에 `@Service`/`@Transactional`/`@Setter`/`@Data`/public setter/`.now()`/`UUID.randomUUID()` 금지 · 빈약 엔티티 금지 · domain→application/infra 임포트 금지 · application→infra 임포트 금지 · 필드주입(`@Autowired`/`@Value` 필드) 금지(생성자 주입) · `./gradlew`만 사용. (`UUID.randomUUID()`/`LocalDate.now()`는 application/infra 에선 허용.)
-- 현재 전 소스 **차단 0건**, `./gradlew clean build`·ArchUnit(11 규칙: 기존 8 + `CORE_NOT_DEPEND_ON_GENERIC`·`REQUEST_INPUT_IS_COMMAND`·`APPLICATION_NOT_DEPEND_ON_INFRASTRUCTURE`) GREEN.
+- **VO/Typed-ID 적용 완료**: 6개 AR 엔티티의 모든 필드를 전용 VO로 감쌌다 — 식별자는 `TermId`/`SchemaCatalogId`/`CodeValueId`/`SchemaMappingId`(`@Embedded`/`@EmbeddedId`), 속성은 `CanonicalName`/`PhysicalTable`/`Code`/`Surface`/`TriggerKeywords`/`ValueTemplate` 등. QueryDSL Q타입·바인딩은 VO의 `value` 컬럼(`@AttributeOverride`)으로 유지. 회귀는 ArchUnit `DDD_VO_IMMUTABLE`·`DDD_TYPED_ID`·`DDD_NO_PRIMITIVE_OBSESSION` 가 차단.
+- 현재 전 소스 **차단 0건**, `./gradlew clean build`·ArchUnit **20 규칙** GREEN — opinionated-harness-template 18 + 자체 2(`APPLICATION_NOT_DEPEND_ON_INFRASTRUCTURE`·`DOMAIN_ENTITY_NO_RAW_STRING`). 템플릿 PR #13 신규 4종: `AGGREGATE_ID_FIELD_IS_TYPED`·`NO_AUTOWIRED_IN_DOMAIN`·`AGGREGATE_NO_EXPOSED_MUTABLE_COLLECTION`·`COMMAND_IS_IMMUTABLE`. 규칙 정의 `src/test/java/com/hris/metadata/archunit/DddRules.java`, 표·운용은 `docs/ARCHUNIT.md`.
 - **슬래시 커맨드**: `/ddd-review` · `/ddd-fix` · `/verify`. 훅 실행에 Node.js 필요.
 
 ### Deferred (근거)
 의도적으로 *지금* 도입하지 않는 것들 — 필요 시점에 ADR(`.claude/docs/adr-aggregate-decisions.md`)·context-map(`.claude/docs/context-map.md`) 참조.
-- **조회 대상 컬럼 VO 화**: `canonicalName`/`physicalTable`/`physicalColumn`/`code`/`surface`/`triggerKeywords`/`valueTemplate` 는 QueryDSL where/join 타깃. VO 화 시 Q타입·바인딩·조인 깨짐 리스크가 실효 대비 커서 보류(원시 타입 + 팩토리/컴팩트 생성자 검증으로 불변식 유지).
 - **도메인 이벤트**: 소비자(핸들러/버스)가 없고, 도메인 이벤트 발행은 하네스가 차단. 소비자가 생기면 application 발행 + 아웃박스로 도입.
 - **Synonym/CodeValue 를 내부 엔티티로 강등**: 독립 라이프사이클·CRUD·조회 경로가 있고 루트 트랜잭션 불변식을 공유하지 않아 독립 `@AggregateRoot` 로 유지(ADR §1).
